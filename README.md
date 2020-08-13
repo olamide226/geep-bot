@@ -5,7 +5,7 @@ An Interactive bot for handling customer support &amp; queries on the GEEP platf
 * Python >=3.5
 
 ```
-virtualenv venv && source .env/bin/activate && pip install -r requirements.txt
+virtualenv venv && source venv/bin/activate && pip install -r requirments.txt
 ```
 
 Run ```python main.py``` to get started

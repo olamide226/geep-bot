@@ -13,10 +13,14 @@ def main():
         return jsonify({"status":"Invalid Request"})
     # print content['mytext']
     if content['type'] == 'message' and content['app'] == 'GEEPNG':
-        bot = WhatsBot(content['payload']['sender']['phone'], content['payload']['payload']['text'])
-        return 'True'
+        sender = content['payload']['sender']['phone']
+        message = content['payload']['payload']['text']
+        bot = WhatsBot(sender, message)
+        response = bot.respond()
+        return str( response(sender, message) )
+    else:
+        return jsonify({"status":"Invalid Request"})
 
-    return jsonify({"status":content})
 
 if __name__ == '__main__':
     app.run(host= '0.0.0.0',debug=True)
