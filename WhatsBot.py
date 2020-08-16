@@ -44,19 +44,26 @@ class WhatsBot():
         self.reg_sender = self.redis.hget(self.userid, 'id')
         #set cuurent menu
         self.current_menu = self.redis.hget(self.userid, 'menu')
+        self.sub_menu = self.redis.hget(self.userid, 'sub_menu')
+
+            
+    def __dict__(self):
+        return {'message': self.msg}
     
-    def respond(self):
+    def reply(self):
+        
         return {
         # 'default': self.greet,
         'main': self.main_menu,
         'enquiry': Enquiry,
+        'loan_status': LoanStatus,
 
-        }.get(self.current_menu, self.greet)
+        }.get(self.current_menu, self.unknown_response)
 
     def send_message(self, msg):
         url = "https://api.gupshup.io/sm/api/v1/msg"
         source = '917834811114'
-        msg = quote_plus(msg)
+        # msg = quote_plus(msg)
         destination=self.sender
         app_name = 'GEEPNG'
         payload = 'source={}&channel=whatsapp&destination={}&src.name={}&message={}'. \
@@ -66,18 +73,21 @@ class WhatsBot():
         'Cache-Control': 'no-cache',
         'Content-Type': 'application/x-www-form-urlencoded'
         }
+        self.msg = msg
 
-        response = requests.request("POST", url, headers=headers, data = payload)
-
-        return (response.text.encode('utf8'))
+        # self.response = requests.request("POST", url, headers=headers, data = payload)
+        # return self.response.json()
+        return {'message': self.msg}
+        # return (response.text.encode('utf8'))
     
-    def greet(self, args='', args2=''):
+    def welcome(self):
         """ args and args2 are just placeholders to give support to underlying Class args """
         #Check For A Greeting to activate interactive bot
         if re.search('(hello|holla|hey|how|hi|yo|what|good)', self.message):
 
             #SET current menu to main menu for the current user
-            self.redis.hset(self.userid, 'menu','main')
+            self.redis.hmset(self.userid, {'menu': 'main', 'sub_menu': ''})
+            print('Parent greet function')
 
             msg = """*Welcome to GEEP*\n
 *WHAT WOULD YOU LIKE TO DO* 
@@ -93,10 +103,11 @@ _To make a selection, reply with the number *ONLY* of your option._\n
 
             return self.send_message(msg) #end whatsapp message
         else:
-            return self.unknown_response()
+            return False
 
     def main_menu(self, args='', args2=''):
         """ globals()['classname-or-functionname']( args )  """
+
         menus = ['1', '2', '3', '4', '5']
         if self.message not in menus:
             return self.unknown_response()
@@ -104,7 +115,7 @@ _To make a selection, reply with the number *ONLY* of your option._\n
         menus = dict([('1', 'Enquiry'), ('2', 'LoanStatus'), ('3', 'RepayOptions'),
                 ('4', 'NextLoan'), ('5', 'Logout')])
 
-        return globals()[ menus[ self.message ] ]( self.sender, self.message ) 
+        return globals()[ menus[ self.message ] ]( self.sender, 'init' ) 
         
     def logout(self):
         """ This function destroys session data """
@@ -112,6 +123,8 @@ _To make a selection, reply with the number *ONLY* of your option._\n
         return self.send_message("Thank you for your time  👏")
 
     def unknown_response(self, args='', args2=''):
+        if self.welcome(): return {'message': self.msg}
+
         return self.send_message("Kindly enter a valid response")
         ##End of WhatsBot Class##
 
@@ -120,17 +133,14 @@ class Enquiry(WhatsBot):
     def __init__(self, sender, message):
         super().__init__(sender, message)
         self.redis.hset(self.userid, 'menu','enquiry')
-        if self.redis.hget(self.userid, 'sub_menu'):
-            self.respond()
-        else:
+        if self.message == 'init':
             self.greet()
-    
-    def __str__(self):
-        return 'OK'
-
+        else:
+            self.respond() 
 
     def greet(self):
-        self.redis.hset(self.userid, 'sub_menu','main')
+        self.redis.hset(self.userid, 'sub_menu','enquiry_main')
+        print('enquiry greet function')
         msg = """ *WHAT WOULD YOU LIKE TO DO* 
 
 1. Request For Loan
@@ -146,7 +156,7 @@ Say Hello to return to Main Menu
     def respond(self):
         menus = ['1', '2', '3']
         if self.message not in menus:
-            return super().greet()
+            return self.unknown_response()
         
         func = dict([('1', self.request_loan), ('2', self.loan_terms), ('3', self.call_support) ])
         return func[ self.message ]()
@@ -185,20 +195,75 @@ Say *Hello* to return to Main Menu """
 class LoanStatus(WhatsBot):
     def __init__(self, sender, message):
         super().__init__(sender, message)
-        self.redis.hset(self.userid, 'menu','main')
+        self.redis.hset(self.userid, 'menu','loan_status')
+        if self.message == 'init':
+            self.greet()
+        else:
+            self.respond()
+    
+    def greet(self):
+        self.redis.hset(self.userid, 'sub_menu','loan_status_main')
+        print('loan status greet function')
+        msg = """*WHAT WOULD YOU LIKE TO DO*
+
+1. Check Status Of Your Loan Application
+2. Check How Much You Are Owing
+
+_To make a selection, reply with the number ONLY of your option._
+
+Say *Hello* to return to Main Menu
+        """
+        return self.send_message(msg)
+    
+    def respond(self):
+        menus = ['1', '2']
+        if self.message not in menus:
+            return self.unknown_response()
+        
+        func = dict([ ('1', self.check_loan_status), ('2', self.check_amount_owed) ])
+        return func[ self.message ]()
+
+    def check_loan_status(self):
+        msg = "coming soon..."
+
+        return self.send_message(msg)
+
+    def check_amount_owed(self):
+        msg = "coming soon..."
+
+        return self.send_message(msg)
 
 
 class RepayOptions(WhatsBot):
     def __init__(self, sender, message):
         super().__init__(sender, message)
-        self.redis.hset(self.userid, 'menu','main')
+        # self.redis.hset(self.userid, 'menu','repay_options')
+        if self.message == 'init':
+            self.greet()
+
+    
+    def greet(self):
+        msg="""Locate any bank close to you - Meet a bank cashier and tell them you want to use interswitch paydirect 
+to pay for BOI Marketmoni/Tradermoni loan. They will ask you for a reference code or the phone number you registered with.
+*OR* 
+You can buy the Tradermoni scratch card from any Tradermoni onecard agent where you are and you will be guided how to use it.
+
+Say *Hello* to return to Main Menu """
+
+        return self.send_message(msg)
 
 
 class NextLoan(WhatsBot):
     def __init__(self, sender, message):
         super().__init__(sender, message)
-        self.redis.hset(self.userid, 'menu','main')
+        # self.redis.hset(self.userid, 'menu','')
+        if self.message == 'init':
+            self.greet()
 
+    def greet(self):
+        msg= "coming soon..."
+
+        return self.send_message(msg)
 
 class Logout(WhatsBot):
     def __init__(self, sender, message):
