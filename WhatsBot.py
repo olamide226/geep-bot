@@ -76,6 +76,7 @@ class WhatsBot():
         # self.msg = msg
 
         self.response = requests.request("POST", url, headers=headers, data = payload)
+        print(msg)
         return self.response.json()
         # return {'message': self.msg}
         # return (response.text.encode('utf8'))
@@ -140,7 +141,7 @@ class Enquiry(WhatsBot):
 
     def greet(self):
         self.redis.hset(self.userid, 'sub_menu','enquiry_main')
-        print('enquiry greet function')
+
         msg = """ *WHAT WOULD YOU LIKE TO DO* 
 
 1. Request For Loan

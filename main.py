@@ -42,10 +42,10 @@ class HelloWorld(Resource):
             response = bot.reply()
             try:
                 print( jsonify(response(sender, message)) )
-                return True
+                return
             except TypeError:
                 print(response(sender, message).__dict__())
-                return True
+                return
                 
         # return {'hello': 'world'}
 
