@@ -79,7 +79,7 @@ class WhatsBot:
         # self.msg = msg
 
         self.response = requests.request("POST", url, headers=headers, data = payload)
-        print(msg)
+        # print(msg)
         return self.response.json()
         # return {'message': self.msg}
         # return (response.text.encode('utf8'))
