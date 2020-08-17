@@ -25,8 +25,9 @@ import requests
 import redis
 from urllib.parse import quote_plus
 import re
+import inspect
 
-class WhatsBot():
+class WhatsBot:
     
     def __init__(self, sender, message):
 
@@ -46,9 +47,11 @@ class WhatsBot():
         self.current_menu = self.redis.hget(self.userid, 'menu')
         self.sub_menu = self.redis.hget(self.userid, 'sub_menu')
 
+
+
             
-    def __dict__(self):
-        return self.response.json()
+    def __str__(self):
+        return self.response.text.encode('utf8')
     
     def reply(self):
         
@@ -122,9 +125,9 @@ _To make a selection, reply with the number *ONLY* of your option._\n
         """ This function destroys session data """
         self.redis.unlink(self.userid)
         return self.send_message("Thank you for your time  👏")
-
+    
     def unknown_response(self, args='', args2=''):
-        if self.welcome(): return True
+        if self.welcome(): return 'OK'
 
         return self.send_message("Kindly enter a valid response")
         ##End of WhatsBot Class##
@@ -195,6 +198,9 @@ Say *Hello* to return to Main Menu """
 
 class LoanStatus(WhatsBot):
     def __init__(self, sender, message):
+        curframe = inspect.currentframe()
+        calframe = inspect.getouterframes(curframe, 2)
+        print('LoanStatus init caller name:', calframe[1][3])
         super().__init__(sender, message)
         self.redis.hset(self.userid, 'menu','loan_status')
         if self.message == 'init':
@@ -203,6 +209,10 @@ class LoanStatus(WhatsBot):
             self.respond()
     
     def greet(self):
+        curframe = inspect.currentframe()
+        calframe = inspect.getouterframes(curframe, 2)
+        print('LoanStatus caller name:', calframe[1][3])
+
         self.redis.hset(self.userid, 'sub_menu','loan_status_main')
         print('loan status greet function')
         msg = """*WHAT WOULD YOU LIKE TO DO*

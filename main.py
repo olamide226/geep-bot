@@ -1,7 +1,7 @@
 from flask import Flask, request, jsonify
 # https://flask-restful.readthedocs.io/en/latest/quickstart.html
 from flask_restful import Resource, Api
-from WhatsBot import WhatsBot
+from whatsbot import WhatsBot
 
 app = Flask(__name__)
 api = Api(app)
@@ -24,12 +24,13 @@ def main():
         try:
             return jsonify(response(sender, message))
         except TypeError:
-            return jsonify(response(sender, message).__dict__() )
+            return response(sender, message).__str__()
     else:
         return jsonify({"status":"Invalid Request"})
 
 class HelloWorld(Resource):
     def post(self):
+        print("starting")
         content = request.json
 
         if not content:
@@ -39,13 +40,19 @@ class HelloWorld(Resource):
             sender = content['payload']['sender']['phone']
             message = content['payload']['payload']['text']
             bot = WhatsBot(sender, message)
+            print("Reply gotten")
             response = bot.reply()
+            
             try:
-                print( jsonify(response(sender, message)) )
+                r =response(sender, message).__str__()
+                # print(dir(r))
+                print(r)
+                # print("Try Block")
                 return
-            except TypeError:
-                print(response(sender, message).__dict__())
-                return
+            except :
+                # print(response(sender, message).__dict__())
+                # print("Except block")
+                return "error occured"
                 
         # return {'hello': 'world'}
 
