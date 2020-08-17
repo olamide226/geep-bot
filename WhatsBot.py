@@ -25,7 +25,7 @@ import requests
 import redis
 from urllib.parse import quote_plus
 import re
-import inspect
+# import inspect
 
 class WhatsBot:
     

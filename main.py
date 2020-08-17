@@ -30,7 +30,7 @@ def main():
 
 class HelloWorld(Resource):
     def post(self):
-        print("starting")
+        # print("starting")
         content = request.json
 
         if not content:
@@ -40,7 +40,7 @@ class HelloWorld(Resource):
             sender = content['payload']['sender']['phone']
             message = content['payload']['payload']['text']
             bot = WhatsBot(sender, message)
-            print("Reply gotten")
+            # print("Reply gotten")
             response = bot.reply()
             
             try:
