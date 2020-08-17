@@ -41,14 +41,15 @@ class HelloWorld(Resource):
             bot = WhatsBot(sender, message)
             response = bot.reply()
             try:
-                return jsonify(response(sender, message))
+                print( jsonify(response(sender, message)) )
+                return True
             except TypeError:
-                dir(response(sender, message).__dict__())
-                return response(sender, message).__dict__()
+                print(response(sender, message).__dict__())
+                return True
                 
-        return {'hello': 'world'}
+        # return {'hello': 'world'}
 
-api.add_resource(HelloWorld, '/')
+api.add_resource(HelloWorld, '/flask/api')
 
 if __name__ == '__main__':
     app.run(host= '0.0.0.0',debug=True)

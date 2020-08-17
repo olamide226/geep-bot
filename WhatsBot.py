@@ -48,7 +48,7 @@ class WhatsBot():
 
             
     def __dict__(self):
-        return {'message': self.msg}
+        return self.response.json()
     
     def reply(self):
         
@@ -63,7 +63,7 @@ class WhatsBot():
     def send_message(self, msg):
         url = "https://api.gupshup.io/sm/api/v1/msg"
         source = '917834811114'
-        # msg = quote_plus(msg)
+        msg = quote_plus(msg)
         destination=self.sender
         app_name = 'GEEPNG'
         payload = 'source={}&channel=whatsapp&destination={}&src.name={}&message={}'. \
@@ -73,11 +73,11 @@ class WhatsBot():
         'Cache-Control': 'no-cache',
         'Content-Type': 'application/x-www-form-urlencoded'
         }
-        self.msg = msg
+        # self.msg = msg
 
-        # self.response = requests.request("POST", url, headers=headers, data = payload)
-        # return self.response.json()
-        return {'message': self.msg}
+        self.response = requests.request("POST", url, headers=headers, data = payload)
+        return self.response.json()
+        # return {'message': self.msg}
         # return (response.text.encode('utf8'))
     
     def welcome(self):
@@ -123,7 +123,7 @@ _To make a selection, reply with the number *ONLY* of your option._\n
         return self.send_message("Thank you for your time  👏")
 
     def unknown_response(self, args='', args2=''):
-        if self.welcome(): return {'message': self.msg}
+        if self.welcome(): return True
 
         return self.send_message("Kindly enter a valid response")
         ##End of WhatsBot Class##
