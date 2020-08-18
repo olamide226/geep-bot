@@ -198,9 +198,9 @@ Say *Hello* to return to Main Menu """
 
 class LoanStatus(WhatsBot):
     def __init__(self, sender, message):
-        curframe = inspect.currentframe()
-        calframe = inspect.getouterframes(curframe, 2)
-        print('LoanStatus init caller name:', calframe[1][3])
+        # curframe = inspect.currentframe()
+        # calframe = inspect.getouterframes(curframe, 2)
+        # print('LoanStatus init caller name:', calframe[1][3])
         super().__init__(sender, message)
         self.redis.hset(self.userid, 'menu','loan_status')
         if self.message == 'init':
@@ -209,9 +209,9 @@ class LoanStatus(WhatsBot):
             self.respond()
     
     def greet(self):
-        curframe = inspect.currentframe()
-        calframe = inspect.getouterframes(curframe, 2)
-        print('LoanStatus caller name:', calframe[1][3])
+        # curframe = inspect.currentframe()
+        # calframe = inspect.getouterframes(curframe, 2)
+        # print('LoanStatus caller name:', calframe[1][3])
 
         self.redis.hset(self.userid, 'sub_menu','loan_status_main')
         print('loan status greet function')
