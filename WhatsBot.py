@@ -25,6 +25,7 @@ import requests
 import redis
 from urllib.parse import quote_plus
 import re
+from nerve import GeepNerve
 # import inspect
 
 class WhatsBot:
@@ -54,6 +55,7 @@ class WhatsBot:
         return self.response.text.encode('utf8')
     
     def reply(self):
+        """ Add Top level menus here if it has sub menus else leave to main_menu() to handle """
         
         return {
         # 'default': self.greet,
@@ -85,13 +87,12 @@ class WhatsBot:
         # return (response.text.encode('utf8'))
     
     def welcome(self):
-        """ args and args2 are just placeholders to give support to underlying Class args """
+        
         #Check For A Greeting to activate interactive bot
         if re.search('(hello|holla|hey|how|hi|yo|what|good)', self.message):
 
             #SET current menu to main menu for the current user
             self.redis.hmset(self.userid, {'menu': 'main', 'sub_menu': ''})
-            print('Parent greet function')
 
             msg = """*Welcome to GEEP*\n
 *WHAT WOULD YOU LIKE TO DO* 
@@ -102,7 +103,7 @@ class WhatsBot:
 4. Request For Next Loan
 5. Logout
 _To make a selection, reply with the number *ONLY* of your option._\n
-*EXAMPLE:* Reply with *1* to check Loan Status
+*EXAMPLE:* Reply with *1* to make Enquiry
             """
 
             return self.send_message(msg) #end whatsapp message
@@ -153,7 +154,7 @@ class Enquiry(WhatsBot):
 
 _To make a selection, reply with the number *ONLY* of your option._
 
-Say Hello to return to Main Menu
+Type Hi to return to Main Menu
 """
         return self.send_message(msg)
     
@@ -186,7 +187,7 @@ After repayment of ₦20,000 within 6 months, you will qualify to borrow ₦25,0
 
 When you payback the first loan given within 6 months you will be given another loan within 2 days of repayment
 
-Say *Hello* to return to Main Menu """
+Type *Hi* to return to Main Menu """
 
         return self.send_message(msg)
 
@@ -222,7 +223,7 @@ class LoanStatus(WhatsBot):
 
 _To make a selection, reply with the number ONLY of your option._
 
-Say *Hello* to return to Main Menu
+Type *Hi* to return to Main Menu
         """
         return self.send_message(msg)
     
@@ -234,8 +235,32 @@ Say *Hello* to return to Main Menu
         func = dict([ ('1', self.check_loan_status), ('2', self.check_amount_owed) ])
         return func[ self.message ]()
 
+    def unknown_number(self, phone):
+        self.redis.hset(self.userid, 'last_message', self.message)
+        self.redis.hset(self.userid, 'sub_menu','loan_status_main')
+
+        msg = """*Please confirm your registered phone number*
+
+1. {} is my registered phone number
+2. Enter my registered phone number  
+
+_To make a selection, reply with the number ONLY of your option._ """
+
+        return self.send_message(msg)
+
     def check_loan_status(self):
-        msg = "coming soon..."
+        status = GeepNerve(self.reg_sender)
+        status = status.check_loan_status()
+        if not status: return self.unknown_number(self.reg_sender)
+
+        if status[0] == 'LoanDisbursedSuccessfully':
+            msg = 'Your loan has been disbursed successfully'
+        elif status[0] in ['PendingApproval', 'PendingCustomerConfirmation', 'PendingFIreConfirmation', 'PendingICUConfirmation']:
+            msg = "Your loan application is being processed"
+        elif status[0] == 'DueForDisbursement':
+            msg = 'Your loan application is due for disbursement'
+        else:
+            msg = 'Your loan application was unsuccessful'
 
         return self.send_message(msg)
 
@@ -259,7 +284,7 @@ to pay for BOI Marketmoni/Tradermoni loan. They will ask you for a reference cod
 *OR* 
 You can buy the Tradermoni scratch card from any Tradermoni onecard agent where you are and you will be guided how to use it.
 
-Say *Hello* to return to Main Menu """
+Type *Hi* to return to Main Menu """
 
         return self.send_message(msg)
 
