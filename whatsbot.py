@@ -52,7 +52,12 @@ class WhatsBot:
 
             
     def __str__(self):
-        return self.response.text.encode('utf8')
+        try:
+            return self.response.text.encode('utf8')
+        except AttributeError:
+            return 'ok'
+
+
     
     def reply(self):
         """ Add Top level menus here if it has sub menus else leave to main_menu() to handle """
@@ -62,6 +67,7 @@ class WhatsBot:
         'main': self.main_menu,
         'enquiry': Enquiry,
         'loan_status': LoanStatus,
+        'unknown_number': UnknownNumber
 
         }.get(self.current_menu, self.unknown_response)
 
@@ -131,7 +137,67 @@ _To make a selection, reply with the number *ONLY* of your option._\n
         if self.welcome(): return 'OK'
 
         return self.send_message("Kindly enter a valid response")
+    
+    
         ##End of WhatsBot Class##
+
+class UnknownNumber(WhatsBot):
+    def __init__(self, sender, message, prev_menu=None, last_msg=None):
+        super().__init__(sender, message)
+        
+        if self.message == 'init':
+            # Set the menus if it is the first time
+            self.redis.hmset( self.userid, 
+            { 'menu': 'unknown_number', 'prev_menu': prev_menu, 'last_message': last_msg}
+        )
+            self.greet()
+        else:
+            self.respond()
+    
+
+    def greet(self):
+
+        msg = """ *Please confirm your registered phone number*
+
+1. {} is my registered phone number
+2. Enter my registered phone number  
+
+_To make a selection, reply with the number ONLY of your option._ """.format(self.reg_sender)
+
+        return self.send_message(msg)
+
+    def respond(self):
+
+        if re.findall(r"\d{13}", self.message):
+            return self.set_new_number(self.message)
+
+        menus = ['1', '2']
+        if self.message not in menus:
+            return self.unknown_response()
+        
+        func = dict([('1', self.not_found), ('2', self.get_new_number) ])
+        return func[ self.message ]()
+
+    def not_found(self):
+        msg = "Sorry, Your phone number does not exist in our records"
+
+        return self.send_message(msg)
+
+    def get_new_number(self):
+        msg = "Please enter your number in the format *2348012345678*"
+
+        return self.send_message(msg)
+
+    def set_new_number(self, new_number):
+
+        self.redis.hset(self.userid, 'id', new_number)
+        self.current_menu = self.redis.hget(self.userid, 'prev_menu')
+        last_message = self.redis.hget(self.userid, 'last_message')
+        next_menu = self.reply()
+        print(globals())
+        next_menu(self.sender, last_message).__str__()
+        return
+
 
 
 class Enquiry(WhatsBot):
@@ -141,7 +207,7 @@ class Enquiry(WhatsBot):
         if self.message == 'init':
             self.greet()
         else:
-            self.respond() 
+            self.respond()
 
     def greet(self):
         self.redis.hset(self.userid, 'sub_menu','enquiry_main')
@@ -215,7 +281,7 @@ class LoanStatus(WhatsBot):
         # print('LoanStatus caller name:', calframe[1][3])
 
         self.redis.hset(self.userid, 'sub_menu','loan_status_main')
-        print('loan status greet function')
+
         msg = """*WHAT WOULD YOU LIKE TO DO*
 
 1. Check Status Of Your Loan Application
@@ -235,23 +301,16 @@ Type *Hi* to return to Main Menu
         func = dict([ ('1', self.check_loan_status), ('2', self.check_amount_owed) ])
         return func[ self.message ]()
 
-    def unknown_number(self, phone):
-        self.redis.hset(self.userid, 'last_message', self.message)
-        self.redis.hset(self.userid, 'sub_menu','loan_status_main')
-
-        msg = """*Please confirm your registered phone number*
-
-1. {} is my registered phone number
-2. Enter my registered phone number  
-
-_To make a selection, reply with the number ONLY of your option._ """
-
-        return self.send_message(msg)
+    
 
     def check_loan_status(self):
+        # self.redis.hset(self.userid, 'sub_menu','loan_status_check')
+
         status = GeepNerve(self.reg_sender)
         status = status.check_loan_status()
-        if not status: return self.unknown_number(self.reg_sender)
+        if not status: 
+            UnknownNumber(self.reg_sender, 'init', 'loan_status', self.message) 
+            return 
 
         if status[0] == 'LoanDisbursedSuccessfully':
             msg = 'Your loan has been disbursed successfully'
@@ -260,12 +319,24 @@ _To make a selection, reply with the number ONLY of your option._ """
         elif status[0] == 'DueForDisbursement':
             msg = 'Your loan application is due for disbursement'
         else:
-            msg = 'Your loan application was unsuccessful'
+            msg = "Your loan application was unsuccessful"
+
+        msg = msg + "\n\nType *Hi* to return to Main Menu"
 
         return self.send_message(msg)
 
     def check_amount_owed(self):
-        msg = "coming soon..."
+        # self.redis.hset(self.userid, 'sub_menu','loan_status_amount_owed2')
+        amount_owed = GeepNerve(self.reg_sender)
+        amount_owed = amount_owed.check_amount_owed()
+
+        if not amount_owed: 
+            UnknownNumber(self.reg_sender, 'init', 'loan_status', self.message) 
+            return
+        
+        msg = """Your are owing *₦{:,}*
+
+ Type *Hi* to return to Main Menu""".format(amount_owed[0])
 
         return self.send_message(msg)
 
@@ -297,7 +368,7 @@ class NextLoan(WhatsBot):
             self.greet()
 
     def greet(self):
-        msg= "coming soon..."
+        msg= "Once your payment has been validated on the system, you will be sent an upgrade message for the second level of Loan"
 
         return self.send_message(msg)
 

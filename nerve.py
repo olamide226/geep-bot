@@ -15,7 +15,7 @@ class GeepNerve(object):
     DATABASE = os.getenv("DATABASE")
 
     def __init__(self, phone):
-        self.phone = '0' + phone.lstrip('234') #change 234813xx to 0813xx
+        self.phone = '0' + phone.lstrip('0234') #change 234813xx to 0813xx
         self.connection = mysql.connect(
         host= self.HOST,
         user= self.USERNAME,
@@ -32,6 +32,17 @@ class GeepNerve(object):
         result = cursor.fetchone()
 
         return result
+    
+    def check_amount_owed(self):
+        cursor = self.connection.cursor(buffered=True)
+        sql = "SELECT amount_due from geep_nerve.boi_nerve_master where phone = %s"
+        param = (self.phone, )
+
+        cursor.execute(sql, param)
+        result = cursor.fetchone()
+
+        return result
+
 
 
 
