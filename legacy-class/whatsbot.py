@@ -26,6 +26,7 @@ import redis
 from urllib.parse import quote_plus
 import re
 from nerve import GeepNerve
+
 # import inspect
 
 class WhatsBot:
@@ -194,7 +195,7 @@ _To make a selection, reply with the number ONLY of your option._ """.format(sel
         self.current_menu = self.redis.hget(self.userid, 'prev_menu')
         last_message = self.redis.hget(self.userid, 'last_message')
         next_menu = self.reply()
-        print(globals())
+
         next_menu(self.sender, last_message).__str__()
         return
 
