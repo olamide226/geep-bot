@@ -14,7 +14,7 @@ whatsbot.py
  * 
  * Date:                        2020-07-09
  * Title:                      Whatsapp Chat Bot 
- * Version:             1.0
+ * Version:             2.0
  * Description:  This is an interactive bot that offers an interactive support
  * to current beneficiaries 
  * .
@@ -149,11 +149,9 @@ _To make a selection, reply with the number *ONLY* of your option._
 
 class UnknownNumber(WhatsBot):
     def __init__(self, sender, message, prev_menu=None, last_msg=None):
-        print(1)
         super().__init__(sender, message)
-        print(2)
+
         if self.message == 'init':
-            print(3)
             # Set the menus if it is the first time
             self.redis.hmset( self.userid, 
             { 'menu': 'unknown_number', 'prev_menu': prev_menu, 'last_message': last_msg}
@@ -309,9 +307,8 @@ _To make a selection, reply with the number ONLY of your option._
         status = GeepNerve(self.reg_sender, 'Tradermoni')
         status = status.check_loan_status()
         if not status:
-
             UnknownNumber(self.reg_sender, 'init', 'loan_status', self.message) 
-            return 
+            return
 
         if status[0] == 'LoanDisbursedSuccessfully':
             msg = 'Your loan has been disbursed successfully'
@@ -341,9 +338,9 @@ _Reply *#* to return to Main Menu_""".format(amount_owed[0])
 
         return self.send_message(msg)
 
-    def check_date_disbursed(self, parameter_list):
+    def check_date_disbursed(self):
         date_disbursed = GeepNerve(self.reg_sender, 'Tradermoni')
-        date_disbursed = date_disbursed.check_date_disbursed
+        date_disbursed = date_disbursed.check_date_disbursed()
 
         if not date_disbursed:
             UnknownNumber(self.reg_sender, 'init', 'loan_status', self.message)

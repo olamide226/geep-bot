@@ -26,8 +26,8 @@ class GeepNerve:
     
     def check_loan_status(self):
         cursor = self.connection.cursor(buffered=True)
-        sql = "SELECT status FROM cmdc.gcc_cbr_tmp WHERE phone = %s AND product_type = %s"
-        param = (self.phone, self.product, )
+        sql = "SELECT status FROM cmdc.gcc_cbr_tmp WHERE phone = %s "
+        param = (self.phone, )
 
         cursor.execute(sql, param)
         result = cursor.fetchone()
@@ -46,7 +46,7 @@ class GeepNerve:
     
     def check_date_disbursed(self):
         cursor = self.connection.cursor(buffered=True)
-        sql = "SELECT loan_disburse_date from cmdc.gcc_cbr_tmp where phone = %s AND product_type =%s"
+        sql = "SELECT loan_disburse_date from cmdc.gcc_cbr_tmp where phone = %s "
         param = (self.phone, )
 
         cursor.execute(sql, param)
