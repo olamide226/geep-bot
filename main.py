@@ -6,6 +6,7 @@ from flask_restful import Resource, Api
 import redis
 import requests
 from importlib import import_module
+from nerve import GeepNerve
 app = Flask(__name__)
 api = Api(app)
 
@@ -14,6 +15,7 @@ class HelloWorld(Resource):
     def post(self):
 
         content = request.json
+        GeepNerve('','').save_request(str(content))
 
         if not content:
             return {"status":"Invalid Request"}
