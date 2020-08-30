@@ -61,7 +61,7 @@ class GeepNerve:
         cursor.execute(sql, param)
         self.connection.commit()
 
-        print(cursor.rowcount, "record inserted.")
+        # print(cursor.rowcount, "record inserted.")
         pass
 
 

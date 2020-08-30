@@ -22,7 +22,7 @@ class HelloWorld(Resource):
 
         if content['type'] == 'message' and content['app'] == 'GEEPNG':
             sender = content['payload']['sender']['phone']
-            message = content['payload']['payload']['text']
+            message = content['payload']['payload']['text'].strip()
 
             # language_selected = self.get_language(sender)
             language_selected = 'English'

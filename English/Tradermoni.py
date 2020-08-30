@@ -153,33 +153,33 @@ class UnknownNumber(WhatsBot):
 
         if self.message == 'init':
             # Set the menus if it is the first time
-            self.redis.hmset( self.userid, 
+            print( self.redis.hmset( self.userid, 
             { 'menu': 'unknown_number', 'prev_menu': prev_menu, 'last_message': last_msg}
-        )
+        ) )
             self.greet()
         else:
             self.respond()
     
 
-    def greet(self):
+    def greet(self, type=''):
 
-        msg = """ *Please confirm your registered phone number*
+        msg = """{}*Please confirm your registered phone number*
 
 1. {} is my registered phone number
 2. Enter my registered phone number  
 
-_To make a selection, reply with the number ONLY of your option._ """.format(self.reg_sender)
+_To make a selection, reply with the number ONLY of your option._ """.format( type, self.reg_sender)
 
         return self.send_message(msg)
 
     def respond(self):
 
-        if re.findall(r"\d{13}", self.message):
+        if re.findall(r"\d{13}", self.message) and len(self.message) == 13:
             return self.set_new_number(self.message)
 
         menus = ['1', '2']
         if self.message not in menus:
-            return self.unknown_response()
+            return self.greet("Please enter a valid response\n")
         
         func = dict([('1', self.not_found), ('2', self.get_new_number) ])
         return func[ self.message ]()
@@ -307,7 +307,8 @@ _To make a selection, reply with the number ONLY of your option._
         status = GeepNerve(self.reg_sender, 'Tradermoni')
         status = status.check_loan_status()
         if not status:
-            UnknownNumber(self.reg_sender, 'init', 'loan_status', self.message) 
+            unknown = UnknownNumber
+            unknown(self.sender, 'init', 'loan_status', self.message) 
             return
 
         if status[0] == 'LoanDisbursedSuccessfully':
@@ -328,14 +329,15 @@ _To make a selection, reply with the number ONLY of your option._
         amount_owed = GeepNerve(self.reg_sender, 'Tradermoni')
         amount_owed = amount_owed.check_amount_owed()
 
-        if not amount_owed: 
-            UnknownNumber(self.reg_sender, 'init', 'loan_status', self.message) 
+        if not amount_owed:
+            unknown = UnknownNumber 
+            unknown(self.sender, 'init', 'loan_status', self.message) 
             return
         
         msg = """Your are owing *₦{:,}*
 
 _Reply *#* to return to Main Menu_""".format(amount_owed[0])
-
+        print(msg)
         return self.send_message(msg)
 
     def check_date_disbursed(self):
@@ -343,10 +345,10 @@ _Reply *#* to return to Main Menu_""".format(amount_owed[0])
         date_disbursed = date_disbursed.check_date_disbursed()
 
         if not date_disbursed:
-            UnknownNumber(self.reg_sender, 'init', 'loan_status', self.message)
+            UnknownNumber(self.sender, 'init', 'loan_status', self.message)
             return
         
-        msg = "coming soon..."
+        msg = "Your loan was disbursed on {}".format(date_disbursed[0])
         return self.send_message(msg)
 
 
