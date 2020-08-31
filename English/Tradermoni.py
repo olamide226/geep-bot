@@ -36,11 +36,12 @@ class WhatsBot:
         self.sender = sender
         self.message = message.strip().lower()
         self.userid = 'user:' + sender
+        self.redis.expire(self.userid, 1800) #keep user session data for 30mins
         
         #check if user exist before else initialize
         if not self.redis.hget(self.userid, 'id'):
             self.redis.hset(self.userid, 'id', sender)
-            # self.redis.expire(self.userid, 21600) #keep user session data for 6 hrs
+            
         
         # Reg_sender is the registered no used to fetch from the database
         self.reg_sender = self.redis.hget(self.userid, 'id')
