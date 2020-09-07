@@ -46,7 +46,7 @@ class GeepNerve:
     
     def check_date_disbursed(self):
         cursor = self.connection.cursor(buffered=True)
-        sql = "SELECT loan_disburse_date from cmdc.gcc_cbr_tmp where phone = %s "
+        sql = "SELECT DATE_FORMAT(loan_disburse_date, '%d-%b-%Y') as ddate from cmdc.gcc_cbr_tmp where phone = %s "
         param = (self.phone, )
 
         cursor.execute(sql, param)
