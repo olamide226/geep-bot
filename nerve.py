@@ -36,7 +36,7 @@ class GeepNerve:
     
     def check_amount_owed(self):
         cursor = self.connection.cursor(buffered=True)
-        sql = "SELECT amount_due from geep_nerve.boi_nerve_master where phone = %s"
+        sql = "SELECT amount_due from boi_nerve.boi_nerve_master where phone = %s"
         param = (self.phone, )
 
         cursor.execute(sql, param)

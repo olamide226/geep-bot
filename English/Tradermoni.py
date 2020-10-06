@@ -180,7 +180,7 @@ _To make a selection, reply with the number ONLY of your option._ """.format( ty
 
         menus = ['1', '2']
         if self.message not in menus:
-            return self.greet("Please enter a valid response\n")
+            return self.unknown_response()
         
         func = dict([('1', self.not_found), ('2', self.get_new_number) ])
         return func[ self.message ]()
