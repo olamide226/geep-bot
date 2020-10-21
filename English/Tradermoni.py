@@ -1,6 +1,6 @@
 #####!/usr/bin/env python3
 """
-whatsbot.py
+Tradermoni.py
 
  * Copyright © 2020 EBIS LTD <olamideadebayo2001@gmail.com>
  * 

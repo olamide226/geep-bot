@@ -19,6 +19,12 @@ class HelloWorld(Resource):
 
         if not content:
             return {"status":"Invalid Request"}
+        
+        # Check If user just opted in and send intro message
+        if content['type'] == 'user-event' and content['app'] == 'GEEPNG' and content['payload']['type'] == 'opted-in':
+            sender = content['payload']['phone']
+            message = 'Reply *Hello* to get started'
+            return self.send_message(sender, message)
 
         if content['type'] == 'message' and content['app'] == 'GEEPNG':
             sender = content['payload']['sender']['phone']
@@ -41,7 +47,7 @@ class HelloWorld(Resource):
                     message = '#'
                 else:
                     prod = self.set_product(sender, message)
-                    if prod in ['Tradermoni', 'Marketmoni']:
+                    if prod in ['Tradermoni', 'Marketmoni', 'Farmermoni']:
                         WhatsBot = import_module('English.{}'.format(prod)).WhatsBot
                         message = '#' #switch to Main menu
                     else:
@@ -107,18 +113,19 @@ class HelloWorld(Resource):
         msg += "What product would you like to choose? \n"
         msg += "1.	Tradermoni \n"
         msg += "2.	Marketmoni \n"
+        msg += "3.	Farmermoni \n"
         msg += "\n_To make a selection, reply with the number *ONLY* of your option._"
 
         if not product:
             connection.hset("user:{}".format(sender), 'product', 'none')
             return self.send_message(sender, msg)
         
-        if message not in ['1', '2']:
+        if message not in ['1', '2', '3']:
             connection.hdel("user:{}".format(sender), 'product')
             return self.send_message(sender, message)
 
         #Set Product to selected number
-        products = {'1': 'Tradermoni', '2': 'Marketmoni'}
+        products = {'1': 'Tradermoni', '2': 'Marketmoni', '3': 'Farmermoni'}
         connection.hset("user:{}".format(sender), 'product', products[message])
         self.complete = True
         return products[message]
