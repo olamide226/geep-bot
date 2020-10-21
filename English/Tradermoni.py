@@ -96,7 +96,7 @@ class WhatsBot:
     def welcome(self):
         
         #Check For A Greeting to activate interactive bot
-        if '#' == self.message:
+        if self.message.lower() in ['0', 'hello', 'helo']:
 
             #SET current menu to main menu for the current user
             self.redis.hmset(self.userid, {'menu': 'main', 'sub_menu': ''})
@@ -106,11 +106,11 @@ class WhatsBot:
 
 1. Enquiry
 2. Check your Loan status
-3. Repayment Options
-4. Request For Upgrade
+3. How To Repay
+4. Request For Loan Upgrade
 5. Logout
 
-_To make a selection, reply with the number *ONLY* of your option._
+_To make a selection, reply with the *NUMBER ONLY* of your option._
 
 *EXAMPLE:* Reply with *1* to make Enquiry
             """
@@ -175,7 +175,7 @@ _To make a selection, reply with the number ONLY of your option._ """.format( ty
 
     def respond(self):
 
-        if re.findall(r"\d{13}", self.message) and len(self.message) == 13:
+        if re.findall(r"\d{11}", self.message) and len(self.message) == 11:
             return self.set_new_number(self.message)
 
         menus = ['1', '2']
@@ -186,12 +186,12 @@ _To make a selection, reply with the number ONLY of your option._ """.format( ty
         return func[ self.message ]()
 
     def not_found(self):
-        msg = "Sorry, Your phone number does not exist in our records"
+        msg = "Sorry, Your phone number does not exist in our records.\n\n_Reply *0* to return to Main Menu_"
 
         return self.send_message(msg)
 
     def get_new_number(self):
-        msg = "Please enter your number in the format *2348012345678*"
+        msg = "Please enter your number in the format *08012345678*"
 
         return self.send_message(msg)
 
@@ -244,7 +244,7 @@ If you pay your first #10,000 within 6months, you will qualify to borrow #15,000
 After repayment of #15000 within 6 months, you will qualify to borrow #20,000.
 After repayment of #20,000 within 6 months, you will qualify to borrow #25000.
 
-_Reply *#* to return to Main Menu_"""
+_Reply *0* to return to Main Menu_"""
 
         return self.send_message(msg)
     
@@ -252,7 +252,7 @@ _Reply *#* to return to Main Menu_"""
         msg = """Kindly locate a Tradermoni agent close to you in order to capture your biodata and biometrics (information). They will require information on what and where you sell etc.
 *Note*: Tradermoni registration is FREE.
 
-_Reply *#* to return to Main Menu_"""
+_Reply *0* to return to Main Menu_"""
 
         return self.send_message(msg)
 
@@ -321,7 +321,7 @@ _To make a selection, reply with the number ONLY of your option._
         else:
             msg = "Your loan application was unsuccessful"
 
-        msg = msg + "\n\n_Reply *#* to return to Main Menu_"
+        msg = msg + "\n\n_Reply *0* to return to Main Menu_"
 
         return self.send_message(msg)
 
@@ -337,7 +337,7 @@ _To make a selection, reply with the number ONLY of your option._
         
         msg = """Your are owing *₦{:,}*
 
-_Reply *#* to return to Main Menu_""".format(amount_owed[0])
+_Reply *0* to return to Main Menu_""".format(amount_owed[0])
         print(msg)
         return self.send_message(msg)
 
@@ -366,7 +366,7 @@ class RepayOptions(WhatsBot):
 
 *•* Kindly visit any Bank using Interswitch Paydirect for BOI Marketmoni/Tradermoni. You will be asked to provide the phone number you registered with as the reference code.
 
-_Reply *#* to return to Main Menu_"""
+_Reply *0* to return to Main Menu_"""
 
         return self.send_message(msg)
 
@@ -380,7 +380,7 @@ class NextLoan(WhatsBot):
 
     def greet(self):
         msg= "Once your payment has been completed and validated on the system, you will be sent an upgrade message for the second level of loan."
-        msg += "\n\n_Reply *#* to return to Main Menu_"
+        msg += "\n\n_Reply *0* to return to Main Menu_"
 
         return self.send_message(msg)
 

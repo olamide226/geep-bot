@@ -15,7 +15,7 @@ class GeepNerve:
     DATABASE = os.getenv("DATABASE")
 
     def __init__(self, phone, product):
-        self.phone = '0' + phone.lstrip('0234') #change 234813xx to 0813xx
+        self.phone = '0' + phone.lstrip('0234') #change 234813xx OR 0813x to 0813xx
         self.product = product
         self.connection = mysql.connect(
         host= self.HOST,

@@ -23,7 +23,7 @@ class HelloWorld(Resource):
         # Check If user just opted in and send intro message
         if content['type'] == 'user-event' and content['app'] == 'GEEPNG' and content['payload']['type'] == 'opted-in':
             sender = content['payload']['phone']
-            message = 'Reply *Hello* to get started'
+            message = 'Reply *0* to get started'
             return self.send_message(sender, message)
 
         if content['type'] == 'message' and content['app'] == 'GEEPNG':
@@ -44,12 +44,16 @@ class HelloWorld(Resource):
                 elif product_select == 'Marketmoni':
                     # return self.send_message(sender, 'Coming soon...')
                     from English.Marketmoni import WhatsBot
-                    message = '#'
+                    message = '0'
+                elif product_select == 'Farmermoni':
+                    # return self.send_message(sender, 'Coming soon...')
+                    from English.Farmermoni import WhatsBot
+                    message = '0'
                 else:
                     prod = self.set_product(sender, message)
                     if prod in ['Tradermoni', 'Marketmoni', 'Farmermoni']:
                         WhatsBot = import_module('English.{}'.format(prod)).WhatsBot
-                        message = '#' #switch to Main menu
+                        message = '0' #switch to Main menu
                     else:
                         return
 
@@ -84,6 +88,7 @@ class HelloWorld(Resource):
         msg += "1. English\n"
         msg += "2. Yoruba\n"
         msg += "3. Hausa\n"
+        msg += "\n_To make a selection, reply with the *NUMBER ONLY* of your option._"
 
         if not lang:
             connection.hset("user:{}".format(sender), 'lang', 'none')
@@ -114,7 +119,7 @@ class HelloWorld(Resource):
         msg += "1.	Tradermoni \n"
         msg += "2.	Marketmoni \n"
         msg += "3.	Farmermoni \n"
-        msg += "\n_To make a selection, reply with the number *ONLY* of your option._"
+        msg += "\n_To make a selection, reply with the *NUMBER ONLY* of your option._"
 
         if not product:
             connection.hset("user:{}".format(sender), 'product', 'none')
@@ -122,7 +127,7 @@ class HelloWorld(Resource):
         
         if message not in ['1', '2', '3']:
             connection.hdel("user:{}".format(sender), 'product')
-            return self.send_message(sender, message)
+            return self.send_message(sender, msg)
 
         #Set Product to selected number
         products = {'1': 'Tradermoni', '2': 'Marketmoni', '3': 'Farmermoni'}
