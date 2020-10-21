@@ -95,7 +95,7 @@ class WhatsBot:
     def welcome(self):
         
         #Check For A Greeting to activate interactive bot
-        if '#' ==  self.message:
+        if '0' ==  self.message:
 
             #SET current menu to main menu for the current user
             self.redis.hmset(self.userid, {'menu': 'main', 'sub_menu': ''})
