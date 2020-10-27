@@ -25,7 +25,7 @@ class HelloWorld(Resource):
             sender = content['payload']['phone']
             message = 'Reply *0* to get started'
             return self.send_message(sender, message)
-
+        # Check If user sends message and process
         if content['type'] == 'message' and content['app'] == 'GEEPNG':
             sender = content['payload']['sender']['phone']
             message = content['payload']['payload']['text'].strip()

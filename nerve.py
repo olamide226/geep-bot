@@ -14,7 +14,7 @@ class GeepNerve:
     PORT = os.getenv("PORT")
     DATABASE = os.getenv("DATABASE")
 
-    def __init__(self, phone, product):
+    def __init__(self, phone, product=''):
         self.phone = '0' + phone.lstrip('0234') #change 234813xx OR 0813x to 0813xx
         self.product = product
         self.connection = mysql.connect(
@@ -26,7 +26,7 @@ class GeepNerve:
     
     def check_loan_status(self):
         cursor = self.connection.cursor(buffered=True)
-        sql = "SELECT status FROM cmdc.gcc_cbr_tmp WHERE phone = %s "
+        sql = "SELECT status FROM cmdc.gcc_whtl WHERE phone = %s "
         param = (self.phone, )
 
         cursor.execute(sql, param)
@@ -36,7 +36,27 @@ class GeepNerve:
     
     def check_amount_owed(self):
         cursor = self.connection.cursor(buffered=True)
-        sql = "SELECT amount_due from cmdc.gcc_cbr_tmp where phone = %s"
+        sql = "SELECT amount_default from boi_nerve.boi_nerve_master where phone = %s"
+        param = (self.phone, )
+
+        cursor.execute(sql, param)
+        result = cursor.fetchone()
+
+        return result
+    
+    def check_loan_details(self):
+        cursor = self.connection.cursor(buffered=True)
+        sql = "SELECT disbursement, amount_due, total_payments_made, amount_default, date_disbursement, date_cashout from boi_nerve.boi_nerve_master where phone = %s"
+        param = (self.phone, )
+
+        cursor.execute(sql, param)
+        result = cursor.fetchone()
+
+        return result
+
+    def check_amount_paid(self):
+        cursor = self.connection.cursor(buffered=True)
+        sql = "SELECT total_payments_made from boi_nerve.boi_nerve_master where phone = %s"
         param = (self.phone, )
 
         cursor.execute(sql, param)
