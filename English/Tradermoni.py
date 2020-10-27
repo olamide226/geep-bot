@@ -276,6 +276,8 @@ class LoanStatus(WhatsBot):
         self.redis.hset(self.userid, 'menu','loan_status')
         if self.message == 'init':
             self.greet()
+        else:
+            self.unknown_response()
 
     def greet(self):
         # curframe = inspect.currentframe()
@@ -307,7 +309,7 @@ Loan Amount: {}
 Amount Due: {}
 Amount Repaid: {}
 Amount in Default: {}
-Disbursement (Cashout) Date: {}
+Disbursement Date: {}
 
 Press 0 to go back to Menu
 """.format( status[0], loan_amount, amount_due, amount_paid, amount_default, date_disbursed)
@@ -318,11 +320,11 @@ Press 0 to go back to Menu
         return self.send_message(msg)
     
     # def respond(self):
-    #     menus = ['1', '2', '3']
+    #     menus = ['']
     #     if self.message not in menus:
     #         return self.unknown_response()
         
-    #     sub_menus = dict([ ('1', self.check_loan_status), ('2', self.check_date_disbursed),('3', self.check_amount_owed) ])
+    #     sub_menus = dict([ ('1', self.check_loan_status) ])
     #     return sub_menus[ self.message ]()
 
     
@@ -386,6 +388,8 @@ class LoanUpgrade(WhatsBot):
         self.redis.hset(self.userid, 'menu','loan_upgrade')
         if self.message == 'init':
             self.greet()
+        else:
+            self.unknown_response()
 
     def greet(self):
         customer = GeepNerve(self.reg_sender, 'Tradermoni')
