@@ -25,6 +25,9 @@ import requests
 import redis
 from urllib.parse import quote_plus
 import re
+import os
+from dotenv import load_dotenv
+load_dotenv()
 from nerve import GeepNerve
 # import inspect
 
@@ -75,14 +78,14 @@ class WhatsBot:
 
     def send_message(self, msg):
         url = "https://api.gupshup.io/sm/api/v1/msg"
-        source = '917834811114'
+        source = os.getenv("SOURCE")
         msg = quote_plus(msg)
         destination=self.sender
-        app_name = 'GEEPNG'
+        app_name = os.getenv("APP_NAME")
         payload = 'source={}&channel=whatsapp&destination={}&src.name={}&message={}'. \
         format(source, destination, app_name, msg)
         headers = {
-        'apikey': 'a549c98c3076406cc051e51a751fc96c',
+        'apikey': os.getenv("API_KEY"),
         'Cache-Control': 'no-cache',
         'Content-Type': 'application/x-www-form-urlencoded'
         }

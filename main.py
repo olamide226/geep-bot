@@ -7,6 +7,9 @@ import redis
 import requests
 from importlib import import_module
 from nerve import GeepNerve
+import os
+from dotenv import load_dotenv
+load_dotenv()
 app = Flask(__name__)
 api = Api(app)
 
@@ -21,12 +24,12 @@ class HelloWorld(Resource):
             return {"status":"Invalid Request"}
         
         # Check If user just opted in and send intro message
-        if content['type'] == 'user-event' and content['app'] == 'GEEPNG' and content['payload']['type'] == 'opted-in':
+        if content['type'] == 'user-event' and content['app'] == os.getenv("APP_NAME") and content['payload']['type'] == 'opted-in':
             sender = content['payload']['phone']
             message = 'Reply *0* to get started'
             return self.send_message(sender, message)
         # Check If user sends message and process
-        if content['type'] == 'message' and content['app'] == 'GEEPNG':
+        if content['type'] == 'message' and content['app'] == os.getenv("APP_NAME"):
             sender = content['payload']['sender']['phone']
             message = content['payload']['payload']['text'].strip()
 
@@ -141,14 +144,14 @@ class HelloWorld(Resource):
         
     def send_message(self, sender, message):
         url = "https://api.gupshup.io/sm/api/v1/msg"
-        source = '917834811114'
+        source = os.getenv("SOURCE")
         msg = quote_plus(message)
         destination=sender
-        app_name = 'GEEPNG'
+        app_name = os.getenv("APP_NAME")
         payload = 'source={}&channel=whatsapp&destination={}&src.name={}&message={}'. \
         format(source, destination, app_name, msg)
         headers = {
-        'apikey': 'a549c98c3076406cc051e51a751fc96c',
+        'apikey': os.getenv("API_KEY"),
         'Cache-Control': 'no-cache',
         'Content-Type': 'application/x-www-form-urlencoded'
         }
