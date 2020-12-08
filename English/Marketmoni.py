@@ -1,6 +1,6 @@
 #####!/usr/bin/env python3
 """
-Marketoni.py
+Marketmoni.py
 
  * Copyright © 2020 EBIS LTD <olamideadebayo2001@gmail.com>
  * 
@@ -14,7 +14,7 @@ Marketoni.py
  * 
  * Date:                        2020-07-09
  * Title:                      Whatsapp Chat Bot 
- * Version:             1.0
+ * Version:             2.0
  * Description:  This is an interactive bot that offers an interactive support
  * to current beneficiaries 
  * .
@@ -25,10 +25,10 @@ import requests
 import redis
 from urllib.parse import quote_plus
 import re
-from nerve import GeepNerve
+import os
 from dotenv import load_dotenv
 load_dotenv()
-import os
+from nerve import GeepNerve
 # import inspect
 
 class WhatsBot:
@@ -39,11 +39,12 @@ class WhatsBot:
         self.sender = sender
         self.message = message.strip().lower()
         self.userid = 'user:' + sender
+        self.redis.expire(self.userid, 1800) #keep user session data for 30mins
         
         #check if user exist before else initialize
-        if not self.redis.exists(self.userid):
-            self.redis.hmset(self.userid, {'id': sender, 'menu': 'default'})
-            self.redis.expire(self.userid, 21600) #keep user session data for 6 hrs
+        if not self.redis.hget(self.userid, 'id'):
+            self.redis.hset(self.userid, 'id', sender)
+            
         
         # Reg_sender is the registered no used to fetch from the database
         self.reg_sender = self.redis.hget(self.userid, 'id')
@@ -70,7 +71,8 @@ class WhatsBot:
         'main': self.main_menu,
         'enquiry': Enquiry,
         'loan_status': LoanStatus,
-        'unknown_number': UnknownNumber
+        'unknown_number': UnknownNumber,
+        'loan_upgrade': LoanUpgrade
 
         }.get(self.current_menu, self.unknown_response)
 
@@ -83,7 +85,7 @@ class WhatsBot:
         payload = 'source={}&channel=whatsapp&destination={}&src.name={}&message={}'. \
         format(source, destination, app_name, msg)
         headers = {
-        'apikey': 'a549c98c3076406cc051e51a751fc96c',
+        'apikey': os.getenv("API_KEY"),
         'Cache-Control': 'no-cache',
         'Content-Type': 'application/x-www-form-urlencoded'
         }
@@ -98,24 +100,25 @@ class WhatsBot:
     def welcome(self):
         
         #Check For A Greeting to activate interactive bot
-        if '0' ==  self.message:
+        if self.message.lower() in ['0', 'hello', 'helo']:
 
             #SET current menu to main menu for the current user
             self.redis.hmset(self.userid, {'menu': 'main', 'sub_menu': ''})
 
-            msg = """*Welcome to GEEP*\n
+            msg = """*Welcome to BOI-GEEP*\n
 *WHAT WOULD YOU LIKE TO DO* 
 
 1. Enquiry
 2. Check your Loan status
-3. Repayment Options
-4. Request For Next Loan
-5. Logout
-_To make a selection, reply with the number *ONLY* of your option._\n
+3. How To Repay
+4. Request For Loan Upgrade
+5. Speak to an Agent
+6. Logout
+
+_To make a selection, reply with the *NUMBER ONLY* of your option._
+
 *EXAMPLE:* Reply with *1* to make Enquiry
             """
-            msg = 'coming soon'
-            self.redis.unlink(self.userid)
 
             return self.send_message(msg) #end whatsapp message
         else:
@@ -124,19 +127,23 @@ _To make a selection, reply with the number *ONLY* of your option._\n
     def main_menu(self, args='', args2=''):
         """ globals()['classname-or-functionname']( args )  """
 
-        menus = ['1', '2', '3', '4', '5']
+        menus = ['1', '2', '3', '4', '5', '6']
         if self.message not in menus:
             return self.unknown_response()
 
         menus = dict([('1', 'Enquiry'), ('2', 'LoanStatus'), ('3', 'RepayOptions'),
-                ('4', 'NextLoan'), ('5', 'Logout')])
+                ('4', 'LoanUpgrade'), ('5', 'SpeakToAgent'), ('6', 'Logout')])
 
         return globals()[ menus[ self.message ] ]( self.sender, 'init' ) 
         
     def logout(self):
         """ This function destroys session data """
         self.redis.unlink(self.userid)
-        return self.send_message("Thank you for your time  👏")
+
+        msg = "Thank you for using this medium to stay in touch with us."
+        msg += "\nFor more information kindly visit our website www.geep.ng or call 070062753860"
+        msg += "\nTo get started press *0*"
+        return self.send_message(msg)
     
     def unknown_response(self, args='', args2=''):
         if self.welcome(): return 'OK'
@@ -149,31 +156,31 @@ _To make a selection, reply with the number *ONLY* of your option._\n
 class UnknownNumber(WhatsBot):
     def __init__(self, sender, message, prev_menu=None, last_msg=None):
         super().__init__(sender, message)
-        
+
         if self.message == 'init':
             # Set the menus if it is the first time
-            self.redis.hmset( self.userid, 
+            print( self.redis.hmset( self.userid, 
             { 'menu': 'unknown_number', 'prev_menu': prev_menu, 'last_message': last_msg}
-        )
+        ) )
             self.greet()
         else:
             self.respond()
     
 
-    def greet(self):
+    def greet(self, type=''):
 
-        msg = """ *Please confirm your registered phone number*
+        msg = """{}*Please confirm your registered phone number*
 
 1. {} is my registered phone number
 2. Enter my registered phone number  
 
-_To make a selection, reply with the number ONLY of your option._ """.format(self.reg_sender)
+_To make a selection, reply with the number ONLY of your option._ """.format( type, self.reg_sender)
 
         return self.send_message(msg)
 
     def respond(self):
 
-        if re.findall(r"\d{13}", self.message):
+        if re.findall(r"\d{11}", self.message) and len(self.message) == 11:
             return self.set_new_number(self.message)
 
         menus = ['1', '2']
@@ -184,12 +191,12 @@ _To make a selection, reply with the number ONLY of your option._ """.format(sel
         return func[ self.message ]()
 
     def not_found(self):
-        msg = "Sorry, Your phone number does not exist in our records"
+        msg = "Sorry, Your phone number does not exist in our records.\n\n_Reply *0* to return to Main Menu_"
 
         return self.send_message(msg)
 
     def get_new_number(self):
-        msg = "Please enter your number in the format *2348012345678*"
+        msg = "Please enter your number in the format *08012345678*"
 
         return self.send_message(msg)
 
@@ -217,56 +224,52 @@ class Enquiry(WhatsBot):
     def greet(self):
         self.redis.hset(self.userid, 'sub_menu','enquiry_main')
 
-        msg = """ *WHAT WOULD YOU LIKE TO DO* 
+        msg = """ *What would you like to know?* 
 
-1. Request For Loan
-2. Loan Terms and Conditions
-3. Call The Customer Care 
+1. About Marketmoni
+2. How to Register 
+0. Return To Main Menu
 
-_To make a selection, reply with the number *ONLY* of your option._
-
-Type Hi to return to Main Menu
+To make a selection, reply with the *NUMBER ONLY* of your option.
 """
         return self.send_message(msg)
     
     def respond(self):
-        menus = ['1', '2', '3']
+        menus = ['1', '2','*']
         if self.message not in menus:
             return self.unknown_response()
         
-        func = dict([('1', self.request_loan), ('2', self.loan_terms), ('3', self.call_support) ])
-        return func[ self.message ]()
+        sub_menus = dict([('1', self.about), ('2', self.how_to_register), ('*', self.greet) ])
+        return sub_menus[ self.message ]()
 
-    def request_loan(self):
-        msg = """Kindly locate a Tradermoni agent close to you in order to capture your biodata and biometrics. 
-They will require information on what and where you sell e.t.c.
+    def about(self):
+        msg = """• MarketMoni is an interest-free loan from the *Federal Government of Nigeria* to help *traders*, *Small and Medium Scale Enterprises (SMEs)* across the country.
+• Loan range from *₦50,000 - ₦250,000*.
+• Loan tenure is within *6 months*.
+• Administration fee is *5%*.
+• For example, if you take ₦50,000, you will pay back only ₦52,500 with a weekly fee of *₦2,187.5*. 
+• When you payback your first ₦50,000 within 6months, you will qualify to borrow ₦100,000. After repayment of ₦100,000 within 6 months, you will qualify to borrow ₦250,000.
 
-Say *Hello* to return to Main Menu """
+Press 0 to go back to Menu
+
+Press * to go back to Previous Menu
+"""
 
         return self.send_message(msg)
     
-    def loan_terms(self):
-        msg = """The Loan Products are:
-- ₦10,000
-- ₦15,000
-- ₦20.000
-- ₦25,000
+    def how_to_register(self):
+        msg = """➣ You must be a member of a registered market/artisan/Trade cooperative.
+➣ Register through the executives of your cooperative by
+    • Request for a GEEP Agent to come register your cooperative
+    • Register on www.apply.marketmoney.com.ng. Fill the registration for and submit.
 
-If you pay your first ₦10,000 within 6 months, you will qualify to borrow ₦15,000.
-After repayment of ₦15,000 within 6 months, you will qualify to borrow ₦20,000.
-After repayment of ₦20,000 within 6 months, you will qualify to borrow ₦25,000.
+*Note*: REGISTRATION IS *FREE*. Do not pay anybody form anything!
 
-When you payback the first loan given within 6 months you will be given another loan within 2 days of repayment
+Press 0 to go back to Menu
 
-Type *Hi* to return to Main Menu """
-
+Press * to go back to Previous Menu
+"""
         return self.send_message(msg)
-
-    def call_support(self):
-        msg = """The Number to call is *0700 1000 2000* for TraderMoni OR *0700 627 5386* for MarketMoni"""
-
-        return self.send_message(msg)
-        
 
 class LoanStatus(WhatsBot):
     def __init__(self, sender, message):
@@ -278,44 +281,67 @@ class LoanStatus(WhatsBot):
         if self.message == 'init':
             self.greet()
         else:
-            self.respond()
-    
+            self.unknown_response()
+
     def greet(self):
         # curframe = inspect.currentframe()
         # calframe = inspect.getouterframes(curframe, 2)
         # print('LoanStatus caller name:', calframe[1][3])
 
         self.redis.hset(self.userid, 'sub_menu','loan_status_main')
+        status = GeepNerve(self.reg_sender, 'Marketmoni')
+        status = status.check_loan_status()
+        if not status:
+            unknown = UnknownNumber
+            unknown(self.sender, 'init', 'loan_status', self.message) 
+            return
+        if status[0].lower() in ('disbursed', 'cashedout'):
+            customer = GeepNerve(self.reg_sender, 'Marketmoni')
+            loan_details = customer.check_loan_details()
+            loan_amount = '{:,}'.format(loan_details[0])
+            amount_due = '{:,}'.format(loan_details[1])
+            amount_paid = '{:,}'.format(loan_details[2])
+            amount_default = '{:,}'.format(loan_details[3])
+            # Show date disbursed only when cashout date is empty
+            date_disbursed = loan_details[4].strftime("%d-%b-%Y") if loan_details[5] == None else loan_details[5].strftime("%d-%b-%Y")
 
-        msg = """*WHAT WOULD YOU LIKE TO DO*
 
-1. Check Status Of Your Loan Application
-2. Check How Much You Are Owing
 
-_To make a selection, reply with the number ONLY of your option._
+            msg = """Your Loan Status is *{}*
+*Account Summary*
+Loan Amount: {}
+Amount Due: {}
+Amount Repaid: {}
+Amount in Default: {}
+Disbursement Date: {}
 
-Type *Hi* to return to Main Menu
-        """
+Press 0 to go back to Menu
+""".format( status[0], loan_amount, amount_due, amount_paid, amount_default, date_disbursed)
+        else:
+            msg = "Your Loan Status is *{}*".format(status[0])
+            msg += "\n\nPress 0 to go back to Menu"
+
         return self.send_message(msg)
     
-    def respond(self):
-        menus = ['1', '2']
-        if self.message not in menus:
-            return self.unknown_response()
+    # def respond(self):
+    #     menus = ['']
+    #     if self.message not in menus:
+    #         return self.unknown_response()
         
-        func = dict([ ('1', self.check_loan_status), ('2', self.check_amount_owed) ])
-        return func[ self.message ]()
+    #     sub_menus = dict([ ('1', self.check_loan_status) ])
+    #     return sub_menus[ self.message ]()
 
     
 
     def check_loan_status(self):
-        # self.redis.hset(self.userid, 'sub_menu','loan_status_check')
+        self.redis.hset(self.userid, 'sub_menu','loan_status_check')
 
-        status = GeepNerve(self.reg_sender)
+        status = GeepNerve(self.reg_sender, 'Marketmoni')
         status = status.check_loan_status()
-        if not status: 
-            UnknownNumber(self.reg_sender, 'init', 'loan_status', self.message) 
-            return 
+        if not status:
+            unknown = UnknownNumber
+            unknown(self.sender, 'init', 'loan_status', self.message) 
+            return
 
         if status[0] == 'LoanDisbursedSuccessfully':
             msg = 'Your loan has been disbursed successfully'
@@ -326,22 +352,7 @@ Type *Hi* to return to Main Menu
         else:
             msg = "Your loan application was unsuccessful"
 
-        msg = msg + "\n\nType *Hi* to return to Main Menu"
-
-        return self.send_message(msg)
-
-    def check_amount_owed(self):
-        # self.redis.hset(self.userid, 'sub_menu','loan_status_amount_owed2')
-        amount_owed = GeepNerve(self.reg_sender)
-        amount_owed = amount_owed.check_amount_owed()
-
-        if not amount_owed: 
-            UnknownNumber(self.reg_sender, 'init', 'loan_status', self.message) 
-            return
-        
-        msg = """Your are owing *₦{:,}*
-
- Type *Hi* to return to Main Menu""".format(amount_owed[0])
+        msg = msg + "\n\n_Reply *0* to return to Main Menu_"
 
         return self.send_message(msg)
 
@@ -355,17 +366,70 @@ class RepayOptions(WhatsBot):
 
     
     def greet(self):
-        msg="""Locate any bank close to you - Meet a bank cashier and tell them you want to use interswitch paydirect 
-to pay for BOI Marketmoni/Tradermoni loan. They will ask you for a reference code or the phone number you registered with.
-*OR* 
-You can buy the Tradermoni scratch card from any Tradermoni onecard agent where you are and you will be guided how to use it.
+        msg="""
+*➣*     *PAYMENT THROUGH BANK:*
+ 
+• Go To ANY Bank.
 
-Type *Hi* to return to Main Menu """
+• Fill the Teller form.
+
+• Tell The Bank Cashier you want to pay
+   your BOI-GEEP Marketmoni 
+   Loan on PAYDIRECT.
+
+• Give The Bank Cashier the PHONE
+   NUMBER YOU USED TO REGISTER
+   your MarketMoni Loan.
+
+• Collect your payment receipt.
+ 
+*➣*	*PAYMENT THROUGH SCRATCH CARD*
+Buy Marketmoni scratch card from any OneCard Marketmoni agent around you, check the card for guide on how to repay your loan.
+
+Press 0 to go back to main menu
+
+To make a selection, reply with the *NUMBER ONLY* of your option.
+
+"""
 
         return self.send_message(msg)
 
 
-class NextLoan(WhatsBot):
+class LoanUpgrade(WhatsBot):
+    def __init__(self, sender, message):
+        super().__init__(sender, message)
+        self.redis.hset(self.userid, 'menu','loan_upgrade')
+        if self.message == 'init':
+            self.greet()
+        else:
+            self.unknown_response()
+
+    def greet(self):
+        customer = GeepNerve(self.reg_sender, 'Marketmoni')
+        status = customer.check_loan_status()
+        if not status:
+            unknown = UnknownNumber
+            unknown(self.sender, 'init', 'loan_upgrade', self.message) 
+            return
+        if status[0].lower() in ('disbursed', 'cashedout'):
+            amount_owed = customer.check_amount_owed()[0]
+            if amount_owed == 0:
+                msg = "Your request has been received. \nWe will process your loan and you will get your payment in your Wallet Account"
+                msg += "\n\nPress 0 to go back to main menu"
+            else:
+                msg = "You have a loan balance of {}. Kindly pay your current loan before you request for an Upgrade".format(amount_owed)
+                msg += "\n\nPress 0 to go back to main menu"
+        else:
+            msg = "Your loan status is *{}*".format(status[0])
+            msg += "\n\nPress 0 to go back to main menu"
+
+        return self.send_message(msg)
+
+
+class SpeakToAgent(WhatsBot):
+    """
+    As the name suggests..The Returns the Call Centre number to Call
+    """
     def __init__(self, sender, message):
         super().__init__(sender, message)
         # self.redis.hset(self.userid, 'menu','')
@@ -373,9 +437,11 @@ class NextLoan(WhatsBot):
             self.greet()
 
     def greet(self):
-        msg= "Once your payment has been validated on the system, you will be sent an upgrade message for the second level of Loan"
+        msg= "The Number to call is *0700 627 5386* for MarketMoni"
+        msg += "\n\nPress 0 to go back to main menu"
 
         return self.send_message(msg)
+
 
 class Logout(WhatsBot):
     def __init__(self, sender, message):
