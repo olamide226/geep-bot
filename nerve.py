@@ -36,7 +36,7 @@ class GeepNerve:
     
     def check_amount_owed(self):
         cursor = self.connection.cursor(buffered=True)
-        sql = "SELECT amount_default from boi_nerve.boi_nerve_master where phone = %s"
+        sql = "SELECT amount_default from geep_boi_nerve.boi_nerve_master where phone = %s"
         param = (self.phone, )
 
         cursor.execute(sql, param)
@@ -46,7 +46,7 @@ class GeepNerve:
     
     def check_loan_details(self):
         cursor = self.connection.cursor(buffered=True)
-        sql = "SELECT disbursement, amount_due, total_payments_made, amount_default, date_disbursement, date_cashout from boi_nerve.boi_nerve_master where phone = %s"
+        sql = "SELECT disbursement, amount_due, total_payments_made, amount_default, date_disbursement, date_cashout from geep_boi_nerve.boi_nerve_master where phone = %s"
         param = (self.phone, )
 
         cursor.execute(sql, param)
@@ -56,7 +56,7 @@ class GeepNerve:
 
     def check_amount_paid(self):
         cursor = self.connection.cursor(buffered=True)
-        sql = "SELECT total_payments_made from boi_nerve.boi_nerve_master where phone = %s"
+        sql = "SELECT total_payments_made from geep_boi_nerve.boi_nerve_master where phone = %s"
         param = (self.phone, )
 
         cursor.execute(sql, param)

@@ -72,7 +72,8 @@ class WhatsBot:
         'enquiry': Enquiry,
         'loan_status': LoanStatus,
         'unknown_number': UnknownNumber,
-        'loan_upgrade': LoanUpgrade
+        'loan_upgrade': LoanUpgrade,
+        'market_register': RegisterMarket
 
         }.get(self.current_menu, self.unknown_response)
 
@@ -142,7 +143,7 @@ _To make a selection, reply with the *NUMBER ONLY* of your option._
 
         msg = "Thank you for using this medium to stay in touch with us."
         msg += "\nFor more information kindly visit our website www.geep.ng or call 070010002000"
-        
+        msg += "\nTo get started press *0*"
         return self.send_message(msg)
     
     def unknown_response(self, args='', args2=''):
@@ -235,40 +236,136 @@ To make a selection, reply with the *NUMBER ONLY* of your option.
         return self.send_message(msg)
     
     def respond(self):
-        menus = ['1', '2']
+        if self.redis.hget(self.userid, 'sub_menu') == 'enquiry_sub':
+            # set sub_menu back to default
+            self.redis.hset(self.userid, 'sub_menu', 'enquiry_main')
+            #Check if user wants to register market
+            sub_menus = ['5', '1', '2','*']
+            if self.message not in sub_menus:
+               return self.unknown_response()
+            sub_menus = dict([('1', self.about), ('2', self.how_to_register), ('3', self.call_support),('5', self.call_market_register),('*', self.greet) ])
+            return sub_menus[ self.message ]()
+        menus = ['1', '2','*',]
         if self.message not in menus:
             return self.unknown_response()
         
-        sub_menus = dict([('1', self.about), ('2', self.how_to_register), ('3', self.call_support) ])
+        sub_menus = dict([('1', self.about), ('2', self.how_to_register), ('3', self.call_support), ('*', self.greet) ])
         return sub_menus[ self.message ]()
 
     def about(self):
-        msg = """TraderMoni is an interest-free loan from the *Federal Government of Nigeria* for *petty traders* across the country, starting from *N10,000*. 
-The loan tenure is between *3-6 months* with 2.5% admin fee. So, if you collect N10,000, you will pay back N10,250. 
-When you payback your first N10,250 within 3-6months, you will get N15,000, then you progress to N20,000, N50,000 & N100,000.
+        msg = """• TraderMoni is an interest-free loan from the *Federal Government of Nigeria* for *petty traders* across the country.
+• Loan range is from *₦10,000 - ₦100,000*. 
+• loan tenure is between *3-6 months*.
+• Adminstration fee is 2.5%.
+• For example, if you collect ₦10,000, you will pay back ₦10,250 with a weekly fee of ₦427.1. 
+• When you payback your first ₦10,250 within 3-6months, you will get ₦15,000, then you progress to ₦20,000, ₦50,000 & ₦100,000. 
 
 
 Press 0 to go back to Menu
+Press * to go back to Previous Menu
 """
 
         return self.send_message(msg)
     
     def how_to_register(self):
+        self.redis.hset(self.userid, 'sub_menu','enquiry_sub')
         msg = """A TraderMoni agent will come to your market to register you. They will take your names, details of what you sell and take your picture.
 *Note*: Tradermoni registration is FREE.
 
 If your Market has not been registered before *send 5.*
 
 Press 0 to go back to Menu
+Press * to go back to Previous Menu
 """
 
         return self.send_message(msg)
+    def call_market_register(self):
+        # This calls the Class that initates market registration
+        RegisterMarket(self.sender, 'init')
 
     def call_support(self):
         msg = """The Number to call is *0700 1000 2000* for TraderMoni OR *0700 627 5386* for MarketMoni"""
 
         return self.send_message(msg)
         
+    def new_register(self, type = ''):
+        msg = """ Enter your market 
+•       Name:
+•       State:
+•       LGA:
+•       Address:
+
+Note: REGISTRATION IS FREE. Do not Pay anybody for anything!
+
+Press 0 to go back to Menu.
+"""
+        # return self.send_message(msg)
+        #RegisterMarket(self.sender, 'init') 
+
+class RegisterMarket(WhatsBot):
+    def __init__(self, sender, message):
+        super().__init__(sender, message)
+        self.redis.hset(self.userid, 'menu','market_register')
+        if self.message == 'init':
+            self.greet()
+        elif self.message == '0':
+            self.unknown_response()
+        else:
+            self.respond()
+
+    def greet(self):
+        self.redis.hset(self.userid, 'sub_menu','market_register_q2')
+        msg = """Press *0* at anytime to cancel and return to Main Menu
+
+Please Enter Your Market Name """
+        return self.send_message(msg)
+
+    def respond(self):
+        current_question = self.redis.hget(self.userid, 'sub_menu')
+        if current_question == 'market_register_q2':
+            self.q2()
+        elif current_question == 'market_register_q3':
+            self.q3()
+        elif current_question == 'market_register_q4':
+            self.q4()
+        elif current_question == 'market_register_complete':
+            self.save_market()
+
+    def q2(self):
+        self.redis.hset(self.userid, 'sub_menu','market_register_q3')
+        self.redis.hset(self.userid, 'market_name',self.message)
+        msg = """Please Enter Your State """
+        return self.send_message(msg) 
+
+    def q3(self):
+        self.redis.hset(self.userid, 'sub_menu','market_register_q4')
+        self.redis.hset(self.userid, 'market_state',self.message)
+        msg = """Please Enter Your LGA """
+        return self.send_message(msg) 
+
+    def q4(self):
+        self.redis.hset(self.userid, 'sub_menu','market_register_complete')
+        self.redis.hset(self.userid, 'market_lga',self.message)
+        msg = """Please Enter Your Address """
+        return self.send_message(msg) 
+
+    def save_market(self):
+        self.redis.hset(self.userid, 'sub_menu','')
+        self.redis.hset(self.userid, 'market_address',self.message)
+        # Now set the menu back to main menu
+        self.redis.hset(self.userid, 'menu','main_menu')
+
+        # Now save all the market info in a DB
+        name = self.redis.hget(self.userid, 'market_name')
+        state = self.redis.hget(self.userid, 'market_state')
+        lga = self.redis.hget(self.userid, 'market_lga')
+        address = self.redis.hget(self.userid, 'market_address')
+        # call a GeepNerve Fubction to save this info in DB
+        msg = """Market details saved successfully.
+
+Press *0* to return to Main Menu
+ """
+        return self.send_message(msg) 
 
 class LoanStatus(WhatsBot):
     def __init__(self, sender, message):
@@ -366,14 +463,23 @@ class RepayOptions(WhatsBot):
     
     def greet(self):
         msg="""
-*•*	*BANK:* 
-        Go ANY Bank
-        Fill the Teller
-        Tell d Bank Teller you want to pay your BOI-Tradermoni Loan on PAYDIRECT.
-        Give The Bank Teller the PHONE NUMBER YOU USED TO REGISTER your TraderMoni Loan.
-        Collect your payment receipt
+*➣*     *PAYMENT THROUGH BANK:*
+ 
+• Go To ANY Bank.
 
-•	*SCRATCH CARD*
+• Fill the Teller form.
+
+• Tell The Bank Cashier you want to pay
+   your BOI-GEEP Tradermoni
+   Loan on PAYDIRECT.
+
+• Give The Bank Cashier the PHONE
+   NUMBER YOU USED TO REGISTER
+   your TraderMoni Loan.
+
+• Collect your payment receipt.
+
+*➣*     *PAYMENT THROUGH SCRATCH CARD*
 Buy Tradermoni scratch card from any OneCard Tradermoni agent around you, check the card for guide on how to repay your loan.
 
 Press 0 to go back to main menu
