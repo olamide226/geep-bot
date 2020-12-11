@@ -261,8 +261,8 @@ Press * to go back to Previous Menu
     def how_to_register(self):
         msg = """➣ You must be a member of a registered farmer's group/cooperative.
 ➣ Register through the executives of your cooperative by
-    • Request for a GEEP Agent to come register your cooperative
-    • Register on www.apply.marketmoney.com.ng. Fill the registration form and submit.
+    • Requesting for a GEEP Agent to come register your cooperative
+    • Registering on www.apply.marketmoney.com.ng. Fill the registration form and submit.
 
 *Note*: REGISTRATION IS *FREE*. Do not pay anybody for anything!
 
