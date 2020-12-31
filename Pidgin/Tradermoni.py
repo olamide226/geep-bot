@@ -107,18 +107,18 @@ class WhatsBot:
             self.redis.hmset(self.userid, {'menu': 'main', 'sub_menu': ''})
 
             msg = """*Welcome to BOI-GEEP*\n
-*WHAT WOULD YOU LIKE TO DO* 
+*Wetin you go like do* 
 
 1. Enquiry
-2. Check your Loan status
-3. How To Repay
+2. Sabi Loan status
+3. How you go take pay back the loan
 4. Request For Loan Upgrade
-5. Speak to an Agent
+5. Follow Agent talk
 6. Logout
 
-_To make a selection, reply with the *NUMBER ONLY* of your option._
+_Make you reply with the number wey you want._
 
-*EXAMPLE:* Reply with *1* to make Enquiry
+*EXAMPLE:* Reply with *1* for Enquiry
             """
 
             return self.send_message(msg) #end whatsapp message
@@ -141,15 +141,15 @@ _To make a selection, reply with the *NUMBER ONLY* of your option._
         """ This function destroys session data """
         self.redis.unlink(self.userid)
 
-        msg = "Thank you for using this medium to stay in touch with us."
-        msg += "\nFor more information kindly visit our website www.geep.ng or call 070010002000"
-        msg += "\nTo get started press *0*"
+        msg = "You do well say you use this way take reach us."
+        msg += "\nfor more Ogbonge tori make you go our website www.geep.ng or call 070010002000."
+        msg += "\nTo start, make you press 0"
         return self.send_message(msg)
     
     def unknown_response(self, args='', args2=''):
         if self.welcome(): return 'OK'
 
-        return self.send_message("Kindly enter a valid response")
+        return self.send_message("Abeg make you enter correct option")
     
     
         ##End of WhatsBot Class##
@@ -170,12 +170,12 @@ class UnknownNumber(WhatsBot):
 
     def greet(self, type=''):
 
-        msg = """{}*Please confirm your registered phone number*
+        msg = """{}*Abeg, na your phone number wey you register be this?*
 
-1. {} is my registered phone number
-2. Enter my registered phone number  
+1. {} Na my register phone number be this
+2. Enter the phone number wey you take register
 
-_To make a selection, reply with the number ONLY of your option._ """.format( type, self.reg_sender)
+_Make you reply with the number wey you want._ """.format( type, self.reg_sender)
 
         return self.send_message(msg)
 
@@ -192,12 +192,12 @@ _To make a selection, reply with the number ONLY of your option._ """.format( ty
         return func[ self.message ]()
 
     def not_found(self):
-        msg = "Sorry, Your phone number does not exist in our records.\n\n_Reply *0* to return to Main Menu_"
+        msg = "Sorry, your phone number no dey for our record. \n_make you press 0 to go back to the main menu_"
 
         return self.send_message(msg)
 
     def get_new_number(self):
-        msg = "Please enter your number in the format *08012345678*"
+        msg = "Abeg make you enter your number like this"
 
         return self.send_message(msg)
 
@@ -225,13 +225,13 @@ class Enquiry(WhatsBot):
     def greet(self):
         self.redis.hset(self.userid, 'sub_menu','enquiry_main')
 
-        msg = """ *What would you like to know?* 
+        msg = """ *Wetin you go like know?* 
 
 1. About Tradermoni
 2. How to Register 
 0. Return To Main Menu
 
-To make a selection, reply with the *NUMBER ONLY* of your option.
+Make you reply with the number wey you want.
 """
         return self.send_message(msg)
     
@@ -253,31 +253,31 @@ To make a selection, reply with the *NUMBER ONLY* of your option.
         return sub_menus[ self.message ]()
 
     def about(self):
-        msg = """• TraderMoni is an interest-free loan from the *Federal Government of Nigeria* for *petty traders* across the country.
-• Loan range is from *₦10,000 - ₦100,000*. 
-• loan tenure is between *3-6 months*.
-• Adminstration fee is 2.5%.
-• For example, if you collect ₦10,000, you will pay back ₦10,250 with a weekly fee of ₦427.1. 
-• When you payback your first ₦10,250 within 3-6months, you will get ₦15,000, then you progress to ₦20,000, ₦50,000 & ₦100,000.
+        msg = """• TraderMoni na loan from the *Federal Government* of Nigeria for petty traders inside our country and e no get interest..
+• The Loan na from *₦10,000 - ₦100,000*. 
+• Na inside *3-6 months* you go take pay back the loan .
+• Adminstration fee na 2.5%.
+• For example, if you collect ₦10,000, you go pay back ₦10,250 with weekly fee of ₦427.1. 
+• When you payback your first ₦10,250 inside 3-6months, you go qualify to borrow ₦15,000, then you go move to ₦20,000, ₦50,000 & ₦100,000.
 
 
-Press 0 to go back to Menu
+Make you Press 0 to go back to Menu
 
-Press * to go back to Previous Menu
+Make you reply with the number wey you want.
 """
 
         return self.send_message(msg)
     
     def how_to_register(self):
         self.redis.hset(self.userid, 'sub_menu', 'enquiry_sub')
-        msg = """A TraderMoni agent will come to your market to register you. They will take your names, details of what you sell and take your picture.
-*Note*: Tradermoni registration is FREE.
+        msg = """Our TraderMoni agent go come inside market to come register you, take your names and the picture of wetin you dey sell.
+*Note:* REGISTRATION NA FREE. Make you no pay anybody anything!
 
-If your Market has not been registered before *send 5.*
+If we never register your market before *press 5*
 
-Press 0 to go back to Menu
+Make you Press 0 go back to Menu.
 
-Press * to go back to Previous Menu
+Make you reply with the number wey you want.
 """
 
         return self.send_message(msg)
@@ -287,7 +287,7 @@ Press * to go back to Previous Menu
         RegisterMarket(self.sender, 'init')
 
     def call_support(self):
-        msg = """The Number to call is *0700 1000 2000* for TraderMoni OR *0700 627 5386* for MarketMoni"""
+        msg = """The number wey you go call na*0700 1000 2000* for TraderMoni """
 
         return self.send_message(msg)
 class RegisterMarket(WhatsBot):
@@ -303,10 +303,9 @@ class RegisterMarket(WhatsBot):
 
     def greet(self):
         self.redis.hset(self.userid, 'sub_menu','market_register_q2')
-        msg = """Press *0* at anytime to cancel and return to Main Menu
+        msg = """Press *0* make you commot or start again
 
-
-Please Enter Your Market Name """
+Abeg make you enter your market name """
         return self.send_message(msg)
 
     def respond(self):
@@ -323,19 +322,19 @@ Please Enter Your Market Name """
     def q2(self):
         self.redis.hset(self.userid, 'sub_menu','market_register_q3')
         self.redis.hset(self.userid, 'market_name',self.message)
-        msg = """Please Enter Your State """
+        msg = """Abeg Enter Your State """
         return self.send_message(msg)
 
     def q3(self):
         self.redis.hset(self.userid, 'sub_menu','market_register_q4')
         self.redis.hset(self.userid, 'market_state',self.message)
-        msg = """Please Enter Your LGA """
+        msg = """Abeg Enter Your LGA """
         return self.send_message(msg)
 
     def q4(self):
         self.redis.hset(self.userid, 'sub_menu','market_register_complete')
         self.redis.hset(self.userid, 'market_lga',self.message)
-        msg = """Please Enter Your Address """
+        msg = """Abeg Enter Your Address """
         return self.send_message(msg)
 
     def save_market(self):
@@ -351,9 +350,9 @@ Please Enter Your Market Name """
         address = self.redis.hget(self.userid, 'market_address')
         # call a GeepNerve Fubction to save this info in DB
         GeepNerve('','').new_register(name, state, lga, address)
-        msg = """Market details saved successfully.
+        msg = """Your market Details don dey saved.
 
-Press *0* to return to Main Menu
+Make you press *0* to go back to the main menu
  """
         return self.send_message(msg)
 
@@ -394,19 +393,19 @@ class LoanStatus(WhatsBot):
 
 
 
-            msg = """Your Loan Status is *{}*
+            msg = """Your Loan Status na  *{}*
 *Account Summary*
 Loan Amount: {}
-Amount Due: {}
-Amount Repaid: {}
-Amount in Default: {}
-Disbursement Date: {}
+Amount wey you suppose don pa: {}
+Amount wey you don pay: {}
+Amount wey you dey owe: {}
+The day you collect the money: {}
 
-Press 0 to go back to Menu
+Make you Press 0 to go back to Menu
 """.format( status[0], loan_amount, amount_due, amount_paid, amount_default, date_disbursed)
         else:
-            msg = "Your Loan Status is *{}*".format(status[0])
-            msg += "\n\nPress 0 to go back to Menu"
+            msg = "Your Loan Status na *{}*".format(status[0])
+            msg += "\n\nMake you Press 0 to go back to Menu"
 
         return self.send_message(msg)
     
@@ -431,15 +430,15 @@ Press 0 to go back to Menu
             return
 
         if status[0] == 'LoanDisbursedSuccessfully':
-            msg = 'Your loan has been disbursed successfully'
+            msg = 'Your loan don ready '
         elif status[0] in ['PendingApproval', 'PendingCustomerConfirmation', 'PendingFIreConfirmation', 'PendingICUConfirmation']:
-            msg = "Your loan application is being processed"
+            msg = "We still dey work on your loan"
         elif status[0] == 'DueForDisbursement':
-            msg = 'Your loan application is due for disbursement'
+            msg = 'Your loan go soon ready '
         else:
-            msg = "Your loan application was unsuccessful"
+            msg = "We no accept your loan application"
 
-        msg = msg + "\n\n_Reply *0* to return to Main Menu_"
+        msg = msg + "\n\n_Make you Press *0* to go back to Menu_"
 
         return self.send_message(msg)
 
@@ -456,26 +455,26 @@ class RepayOptions(WhatsBot):
         msg="""
 *➣*	*PAYMENT THROUGH BANK:*
  
-• Go To ANY Bank.
+• Go ANY Bank.
 
-• Fill the Teller form.
+• Fill Teller form.
 
-• Tell The Bank Cashier you want to pay
+• Tell The Bank Cashier say you want pay
    your BOI-GEEP Tradermoni
-   Loan on PAYDIRECT.
+   Loan for PAYDIRECT.
 
-• Give The Bank Cashier the PHONE
-   NUMBER YOU USED TO REGISTER
+• Give The Bank Cashier PHONE
+   NUMBER YOU TAKE REGISTER
    your TraderMoni Loan.
 
 • Collect your payment receipt.
 
 *➣*	*PAYMENT THROUGH SCRATCH CARD*
-Buy Tradermoni scratch card from any OneCard agent around you, check the card for guide on how to repay your loan.
+Buy Tradermoni scratch card from any OneCard agent wey dey near you, check the card for guide on how you go repay your loan.
 
-Press 0 to go back to main menu
+Make you Press *0* to go back to Menu
 
-To make a selection, reply with the *NUMBER ONLY* of your option.
+Make you reply with the number wey you want
 
 """
 
@@ -501,14 +500,14 @@ class LoanUpgrade(WhatsBot):
         if status[0].lower() in ('disbursed', 'cashedout'):
             amount_owed = customer.check_amount_owed()[0]
             if amount_owed == 0:
-                msg = "Your request has been received. \nWe will process your loan and you will get your payment in your Wallet Account"
-                msg += "\n\nPress 0 to go back to main menu"
+                msg = "We don receive your request. We go process your loan and you go get your money inside your wallet account"
+                msg += "\n\nMake you Press *0* to go back to Menu"
             else:
-                msg = "You have a loan balance of {}. Kindly pay your current loan before you request for an Upgrade".format(amount_owed)
+                msg = "You dey owe  {}. Make you pay your current loan before You go fit request for Upgrade".format(amount_owed)
                 msg += "\n\nPress 0 to go back to main menu"
         else:
-            msg = "Your loan status is *{}*".format(status[0])
-            msg += "\n\nPress 0 to go back to main menu"
+            msg = "Your loan status na *{}*".format(status[0])
+            msg += "\n\nMake you Press *0* to go back to Menu"
 
         return self.send_message(msg)
 
@@ -524,8 +523,8 @@ class SpeakToAgent(WhatsBot):
             self.greet()
 
     def greet(self):
-        msg= "The Number to call is *0700 1000 200* for TraderMoni"
-        msg += "\n\nPress 0 to go back to main menu"
+        msg= "The Number to call na *0700 1000 200* for TraderMoni"
+        msg += "\n\nMake you Press *0* to go back to Menu"
 
         return self.send_message(msg)
 

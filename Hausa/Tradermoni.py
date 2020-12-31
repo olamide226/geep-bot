@@ -106,19 +106,19 @@ class WhatsBot:
             #SET current menu to main menu for the current user
             self.redis.hmset(self.userid, {'menu': 'main', 'sub_menu': ''})
 
-            msg = """*Welcome to BOI-GEEP*\n
-*WHAT WOULD YOU LIKE TO DO* 
+            msg = """*Barka da zuwa BOI-GEEP*\n
+*Mene ne kake son dubawa?* 
 
-1. Enquiry
-2. Check your Loan status
-3. How To Repay
-4. Request For Loan Upgrade
-5. Speak to an Agent
-6. Logout
+1. Bayanai
+2. Duba matsayin bashin ka 
+3. Yanda za’a biya bashi
+4. Neman bashi na gaba 
+5. Magana da wakili 
+6. Fita daga tattaunawa
 
-_To make a selection, reply with the *NUMBER ONLY* of your option._
+_Don yin zabi, *danna lamba kadai* akan abinda kake so._
 
-*EXAMPLE:* Reply with *1* to make Enquiry
+*Misali:* zaba lamba ta daya don samun bayanai
             """
 
             return self.send_message(msg) #end whatsapp message
@@ -141,15 +141,15 @@ _To make a selection, reply with the *NUMBER ONLY* of your option._
         """ This function destroys session data """
         self.redis.unlink(self.userid)
 
-        msg = "Thank you for using this medium to stay in touch with us."
-        msg += "\nFor more information kindly visit our website www.geep.ng or call 070010002000"
-        msg += "\nTo get started press *0*"
+        msg = "Mun gode da amfani da wannan hanyar don tattaunawa da mu."
+        msg += "\nDomin karin bayani, a duba adireshin yanar gizon mu www.geep.ng ko a kira 070010002000."
+        msg += "\nDomin farawa a danna *0*"
         return self.send_message(msg)
     
     def unknown_response(self, args='', args2=''):
         if self.welcome(): return 'OK'
 
-        return self.send_message("Kindly enter a valid response")
+        return self.send_message("Ayi ƙoƙari a sa amsa dai dai")
     
     
         ##End of WhatsBot Class##
@@ -170,12 +170,12 @@ class UnknownNumber(WhatsBot):
 
     def greet(self, type=''):
 
-        msg = """{}*Please confirm your registered phone number*
+        msg = """{}*Don Allah ka tabbatar da lambar da kayi rijista da shi*
 
-1. {} is my registered phone number
-2. Enter my registered phone number  
+1. {} Itace lambar da nayi rijista da shi
+2. Shiga lambar da nayi rijista da it 
 
-_To make a selection, reply with the number ONLY of your option._ """.format( type, self.reg_sender)
+_Don yin zabi, *danna lamba kadai* akan abinda kake so._ """.format( type, self.reg_sender)
 
         return self.send_message(msg)
 
@@ -192,12 +192,12 @@ _To make a selection, reply with the number ONLY of your option._ """.format( ty
         return func[ self.message ]()
 
     def not_found(self):
-        msg = "Sorry, Your phone number does not exist in our records.\n\n_Reply *0* to return to Main Menu_"
+        msg = "Yi haƙuri, lambar wayar ka be cikin ma'ajiyar mu.\n\n_Danna *0* domin komawa shafin tsare-tsare_"
 
         return self.send_message(msg)
 
     def get_new_number(self):
-        msg = "Please enter your number in the format *08012345678*"
+        msg = "Don Allah kasa lambar waya ta tsarin *08012345678*"
 
         return self.send_message(msg)
 
@@ -225,13 +225,13 @@ class Enquiry(WhatsBot):
     def greet(self):
         self.redis.hset(self.userid, 'sub_menu','enquiry_main')
 
-        msg = """ *What would you like to know?* 
+        msg = """ *Me kake son sani?* 
 
-1. About Tradermoni
-2. How to Register 
-0. Return To Main Menu
+1. Bayani akan Tradermoni
+2. Yanda za ayi rijista  
+0. Koma baya
 
-To make a selection, reply with the *NUMBER ONLY* of your option.
+Don yin zabi, *danna lamba kadai* akan abinda kake so.
 """
         return self.send_message(msg)
     
@@ -253,31 +253,31 @@ To make a selection, reply with the *NUMBER ONLY* of your option.
         return sub_menus[ self.message ]()
 
     def about(self):
-        msg = """• TraderMoni is an interest-free loan from the *Federal Government of Nigeria* for *petty traders* across the country.
-• Loan range is from *₦10,000 - ₦100,000*. 
-• loan tenure is between *3-6 months*.
-• Adminstration fee is 2.5%.
-• For example, if you collect ₦10,000, you will pay back ₦10,250 with a weekly fee of ₦427.1. 
-• When you payback your first ₦10,250 within 3-6months, you will get ₦15,000, then you progress to ₦20,000, ₦50,000 & ₦100,000.
+        msg = """• TraderMoni bashi ne mara riba wanda *gwamnatin tarayyan najeriya* take bama *kananan yan kasuwa* a fadin kasar najeriya.
+• Bashin ya kama daga *₦10,000 - ₦100,000*. 
+• Lokacin biya cikin *wata 3-6* ne.
+• 2.5 % ne kudin aiki akan bashin.
+• Misali, idan aka amsa ₦10,000, za’a biya ₦10,250 ta tsarin biyan ₦427.1 duk mako. 
+• Bayan an gama biyan ₦10,250 cikin watanni 3-6months, zaka samu cancantar samun bashin ₦15,000, bayan nan sai ₦20,000, ₦50,000 da kuma ₦100,000.
 
 
-Press 0 to go back to Menu
+Danna 0 domin komawa shafin tsaretsare.
 
-Press * to go back to Previous Menu
+Danna * domin komawa shafin baya.
 """
 
         return self.send_message(msg)
     
     def how_to_register(self):
         self.redis.hset(self.userid, 'sub_menu', 'enquiry_sub')
-        msg = """A TraderMoni agent will come to your market to register you. They will take your names, details of what you sell and take your picture.
-*Note*: Tradermoni registration is FREE.
+        msg = """Wakilin TraderMoni ze zo kasuwar ka/ki don yi maka/ki rijista. Za a tambaya suna da kuma bayanin abin da ake saidawa da kuma daukan hoton ka/ki.
+*A sani:* Tradermoni Rijista kyauta ne.
 
-If your Market has not been registered before *send 5.*
+Idan ba’a taba yiwa kasuwar ka rijista ba *tura 5.*
 
-Press 0 to go back to Menu
+Danna 0 domin komawa shafin tsaretsare.
 
-Press * to go back to Previous Menu
+Danna * domin komawa shafin baya.
 """
 
         return self.send_message(msg)
@@ -287,7 +287,7 @@ Press * to go back to Previous Menu
         RegisterMarket(self.sender, 'init')
 
     def call_support(self):
-        msg = """The Number to call is *0700 1000 2000* for TraderMoni OR *0700 627 5386* for MarketMoni"""
+        msg = """Kira lambar nan *0700 1000 2000* domin TraderMoni"""
 
         return self.send_message(msg)
 class RegisterMarket(WhatsBot):
@@ -305,8 +305,7 @@ class RegisterMarket(WhatsBot):
         self.redis.hset(self.userid, 'sub_menu','market_register_q2')
         msg = """Press *0* at anytime to cancel and return to Main Menu
 
-
-Please Enter Your Market Name """
+Don Allah Asa bayanan kasuwa kamar haka suna"""
         return self.send_message(msg)
 
     def respond(self):
@@ -323,19 +322,19 @@ Please Enter Your Market Name """
     def q2(self):
         self.redis.hset(self.userid, 'sub_menu','market_register_q3')
         self.redis.hset(self.userid, 'market_name',self.message)
-        msg = """Please Enter Your State """
+        msg = """Don Allah kasa jihar ka/ki"""
         return self.send_message(msg)
 
     def q3(self):
         self.redis.hset(self.userid, 'sub_menu','market_register_q4')
         self.redis.hset(self.userid, 'market_state',self.message)
-        msg = """Please Enter Your LGA """
+        msg = """Don Allah kasa ƙaramar hukumar ka/ki """
         return self.send_message(msg)
 
     def q4(self):
         self.redis.hset(self.userid, 'sub_menu','market_register_complete')
         self.redis.hset(self.userid, 'market_lga',self.message)
-        msg = """Please Enter Your Address """
+        msg = """Don Allah kasa adireshin ka/ki """
         return self.send_message(msg)
 
     def save_market(self):
@@ -351,9 +350,9 @@ Please Enter Your Market Name """
         address = self.redis.hget(self.userid, 'market_address')
         # call a GeepNerve Fubction to save this info in DB
         GeepNerve('','').new_register(name, state, lga, address)
-        msg = """Market details saved successfully.
+        msg = """An samu nasarar ajiye bayanan kasuwa.
 
-Press *0* to return to Main Menu
+Danna *0* domin komawa shafin tsaretsare
  """
         return self.send_message(msg)
 
@@ -394,19 +393,19 @@ class LoanStatus(WhatsBot):
 
 
 
-            msg = """Your Loan Status is *{}*
-*Account Summary*
-Loan Amount: {}
-Amount Due: {}
-Amount Repaid: {}
-Amount in Default: {}
-Disbursement Date: {}
+            msg = """matsayin bashin ka/ki shine *{}*
+*Takaitancen bayani akai*
+Yawan bashi: {}
+Kudin da ya kamata an riga an biya: {}
+Kudin da aka biya: {}
+Kudin da ya rage za’a biya: {}
+Ranar da aka baka kudi: {}
 
-Press 0 to go back to Menu
+Danna 0 domin komawa shafin tsaretsare
 """.format( status[0], loan_amount, amount_due, amount_paid, amount_default, date_disbursed)
         else:
-            msg = "Your Loan Status is *{}*".format(status[0])
-            msg += "\n\nPress 0 to go back to Menu"
+            msg = "Matsayin bashin ka shine *{}*".format(status[0])
+            msg += "\n\nDanna 0 domin komawa shafin tsaretsare"
 
         return self.send_message(msg)
     
@@ -454,28 +453,29 @@ class RepayOptions(WhatsBot):
     
     def greet(self):
         msg="""
-*➣*	*PAYMENT THROUGH BANK:*
+*➣*	*Biyan bashin a banki:*
  
-• Go To ANY Bank.
+• Kaje ko wani banki.
 
-• Fill the Teller form.
+• Ka cika takardar biyan kudi.
 
-• Tell The Bank Cashier you want to pay
-   your BOI-GEEP Tradermoni
-   Loan on PAYDIRECT.
+• A fadawa me amsan kudi a banki cewa
+   kana son biyan bashin BOI-GEEP
+   TraderMoni akan tsarin PAYDIRECT.
 
-• Give The Bank Cashier the PHONE
-   NUMBER YOU USED TO REGISTER
-   your TraderMoni Loan.
+• A bawa me amsan kudi a banki LAMBAR
+   WAYAN DA AKA YI DA SHI AMFANI
+   LOKACIN DA AKAYI RIJISTAN bashin
+   TraderMoni.
 
-• Collect your payment receipt.
+• Amsa takardar shedan an biya kudin.
 
-*➣*	*PAYMENT THROUGH SCRATCH CARD*
-Buy Tradermoni scratch card from any OneCard agent around you, check the card for guide on how to repay your loan.
+*➣*	*BIYAN BASHI TA TSARIN AMFANI DA KATIN*
+A siya katin TraderMoni daga wakilin OneCard a kusa da kai, a duba bayani akan yanda ake biyan bashin akan katin.
 
-Press 0 to go back to main menu
+Danna 0 domin komawa shafin tsaretsare
 
-To make a selection, reply with the *NUMBER ONLY* of your option.
+Don yin zabi, danna *lamba daya kadai* akan abinda kake so.
 
 """
 
@@ -501,14 +501,14 @@ class LoanUpgrade(WhatsBot):
         if status[0].lower() in ('disbursed', 'cashedout'):
             amount_owed = customer.check_amount_owed()[0]
             if amount_owed == 0:
-                msg = "Your request has been received. \nWe will process your loan and you will get your payment in your Wallet Account"
-                msg += "\n\nPress 0 to go back to main menu"
+                msg = "Mun samu bukatun ka/ki. \n. Za muyi aiki akan bashin ka/ki kuma bayan hakan, za’a biya ka kudin a cikin asusun ka."
+                msg += "\n\nDanna 0 domin komawa shafin tsaretsare"
             else:
-                msg = "You have a loan balance of {}. Kindly pay your current loan before you request for an Upgrade".format(amount_owed)
-                msg += "\n\nPress 0 to go back to main menu"
+                msg = "Ka/ki na da sauran bashin da za ka/ki biya {}. Ayi kokari a biya sauran bashin kafin bukata bashi na gaba".format(amount_owed)
+                msg += "\n\nDanna 0 domin komawa shafin tsaretsare"
         else:
-            msg = "Your loan status is *{}*".format(status[0])
-            msg += "\n\nPress 0 to go back to main menu"
+            msg = "Matsayin bashin ka shine *{}*".format(status[0])
+            msg += "\n\nDanna 0 domin komawa shafin tsaretsare"
 
         return self.send_message(msg)
 
@@ -524,8 +524,8 @@ class SpeakToAgent(WhatsBot):
             self.greet()
 
     def greet(self):
-        msg= "The Number to call is *0700 1000 200* for TraderMoni"
-        msg += "\n\nPress 0 to go back to main menu"
+        msg= "Kira lambar nan *0700 1000 2000* domin TraderMoni"
+        msg += "\n\nDanna 0 domin komawa shafin tsaretsare"
 
         return self.send_message(msg)
 

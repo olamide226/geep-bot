@@ -34,7 +34,8 @@ class HelloWorld(Resource):
             message = content['payload']['payload']['text'].strip()
 
             # language_selected = self.get_language(sender)
-            language_selected = 'English'
+            #language_selected = 'English'
+            language_selected = self.get_language(sender)
 
             if language_selected == 'English':
                 product_select = self.get_product(sender)
@@ -47,11 +48,9 @@ class HelloWorld(Resource):
                 elif product_select == 'Marketmoni':
                     # return self.send_message(sender, 'Coming soon...')
                     from English.Marketmoni import WhatsBot
-                    message = '0'
                 elif product_select == 'Farmermoni':
                     # return self.send_message(sender, 'Coming soon...')
                     from English.Farmermoni import WhatsBot
-                    message = '0'
                 else:
                     prod = self.set_product(sender, message)
                     if prod in ['Tradermoni', 'Marketmoni', 'Farmermoni']:
@@ -60,12 +59,100 @@ class HelloWorld(Resource):
                     else:
                         return
 
+            elif language_selected == 'Pidgin':
+                product_select = self.get_product(sender)
+                if  product_select == 'Tradermoni':
+
+                    from Pidgin.Tradermoni import WhatsBot
+                    # The import_module allows to import as string
+                    # WhatsBot = import_module('English.Tradermoni')
+                    # WhatsBot = WhatsBot.WhatsBot
+                elif product_select == 'Marketmoni':
+                    # return self.send_message(sender, 'Coming soon...')
+                    from Pidgin.Marketmoni import WhatsBot
+                elif product_select == 'Farmermoni':
+                    # return self.send_message(sender, 'Coming soon...')
+                    from Pidgin.Farmermoni import WhatsBot
+                else:
+                    prod = self.set_product(sender, message)
+                    if prod in ['Tradermoni', 'Marketmoni', 'Farmermoni']:
+                        WhatsBot = import_module('Pidgin.{}'.format(prod)).WhatsBot
+                        message = '0' #switch to Main menu
+                    else:
+                        return
+
+            elif language_selected == 'Igbo':
+                product_select = self.get_product(sender)
+                if  product_select == 'Tradermoni':
+
+                    from Igbo.Tradermoni import WhatsBot
+                    # The import_module allows to import as string
+                    # WhatsBot = import_module('English.Tradermoni')
+                    # WhatsBot = WhatsBot.WhatsBot
+                elif product_select == 'Marketmoni':
+                    # return self.send_message(sender, 'Coming soon...')
+                    from Igbo.Marketmoni import WhatsBot
+                elif product_select == 'Farmermoni':
+                    # return self.send_message(sender, 'Coming soon...')
+                    from Igbo.Farmermoni import WhatsBot
+                else:
+                    prod = self.set_product(sender, message)
+                    if prod in ['Tradermoni', 'Marketmoni', 'Farmermoni']:
+                        WhatsBot = import_module('Igbo.{}'.format(prod)).WhatsBot
+                        message = '0' #switch to Main menu
+                    else:
+                        return
+
+
             elif language_selected == 'Yoruba':
-                pass
+                product_select = self.get_product(sender)
+                if  product_select == 'Tradermoni':
+
+                    from Yoruba.Tradermoni import WhatsBot
+                    # The import_module allows to import as string
+                    # WhatsBot = import_module('English.Tradermoni')
+                    # WhatsBot = WhatsBot.WhatsBot
+                elif product_select == 'Marketmoni':
+                    # return self.send_message(sender, 'Coming soon...')
+                    from Yoruba.Marketmoni import WhatsBot
+                elif product_select == 'Farmermoni':
+                    # return self.send_message(sender, 'Coming soon...')
+                    from Yoruba.Farmermoni import WhatsBot
+                else:
+                    prod = self.set_product(sender, message)
+                    if prod in ['Tradermoni', 'Marketmoni', 'Farmermoni']:
+                        WhatsBot = import_module('Yoruba.{}'.format(prod)).WhatsBot
+                        message = '0' #switch to Main menu
+                    else:
+                        return
+
             elif language_selected == 'Hausa':
-                pass
+                product_select = self.get_product(sender)
+                if  product_select == 'Tradermoni':
+
+                    from Hausa.Tradermoni import WhatsBot
+                    # The import_module allows to import as string
+                    # WhatsBot = import_module('English.Tradermoni')
+                    # WhatsBot = WhatsBot.WhatsBot
+                elif product_select == 'Marketmoni':
+                    # return self.send_message(sender, 'Coming soon...')
+                    from Hausa.Marketmoni import WhatsBot
+                elif product_select == 'Farmermoni':
+                    # return self.send_message(sender, 'Coming soon...')
+                    from Hausa.Farmermoni import WhatsBot
+                else:
+                    prod = self.set_product(sender, message)
+                    if prod in ['Tradermoni', 'Marketmoni', 'Farmermoni']:
+                        WhatsBot = import_module('Hausa.{}'.format(prod)).WhatsBot
+                        message = '0' #switch to Main menu
+                    else:
+                        return
+
+             
+
             else:
-                return self.set_language(sender, message)
+                self.set_language(sender, message)
+                return
 
 
             bot = WhatsBot(sender, message)
@@ -89,22 +176,24 @@ class HelloWorld(Resource):
         lang = connection.hget("user:{}".format(sender), 'lang')
         msg = "Please select a language\n\n"
         msg += "1. English\n"
-        msg += "2. Yoruba\n"
-        msg += "3. Hausa\n"
+        msg += "2. Hausa\n"
+        msg += "3. Igbo\n"
+        msg += "4. Pidgin\n"
+        msg += "5. Yoruba\n"
         msg += "\n_To make a selection, reply with the *NUMBER ONLY* of your option._"
 
         if not lang:
             connection.hset("user:{}".format(sender), 'lang', 'none')
             return self.send_message(sender, msg)
 
-        if message not in ['1','2','3']:
+        if message not in ['1','2','3','4','5']:
             connection.hdel("user:{}".format(sender), 'lang')
             return self.send_message(sender, msg)
         
         # Set language to selected number
-        languages = dict([('1', 'English'), ('2', 'Yoruba'), ('3', 'Hausa') ])
+        languages = dict([('1', 'English'), ('2', 'Hausa'), ('3', 'Igbo'), ('4', 'Pidgin'), ('5', 'Yoruba') ])
         connection.hset("user:{}".format(sender), 'lang', languages[message])
-        
+            #return self.set_hausa_product(sender, message) 
         # Next step after setting langiage will always be to set product
         return self.set_product(sender, message)
 
@@ -113,11 +202,12 @@ class HelloWorld(Resource):
         product = connection.hget("user:{}".format(sender), 'product')
 
         return product
+
     
     def set_product(self, sender, message):
         connection = redis.Redis(decode_responses=True)
         product = connection.hget("user:{}".format(sender), 'product')
-        msg = "Welcome to *GEEP* \n\n"
+        msg = "Welcome to *BOI-GEEP* \n\n"
         msg += "What product would you like to choose? \n"
         msg += "1.	Tradermoni \n"
         msg += "2.	Marketmoni \n"
@@ -138,7 +228,8 @@ class HelloWorld(Resource):
         self.complete = True
         return products[message]
 
-    def setup(self ,sender, message, language_selected='English'):
+
+    def setup(self ,sender, message, language_selected):
         pass
         
         

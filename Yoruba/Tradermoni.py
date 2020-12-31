@@ -106,19 +106,19 @@ class WhatsBot:
             #SET current menu to main menu for the current user
             self.redis.hmset(self.userid, {'menu': 'main', 'sub_menu': ''})
 
-            msg = """*Welcome to BOI-GEEP*\n
-*WHAT WOULD YOU LIKE TO DO* 
+            msg = """*Káàbọ̀ sí BOI- GEEP*\n
+*Kíni o nífẹ̀ẹ́ sí láti ṣe?* 
 
-1. Enquiry
-2. Check your Loan status
-3. How To Repay
-4. Request For Loan Upgrade
-5. Speak to an Agent
-6. Logout
+1. Ìbéèrè
+2. Ṣe àyẹ̀wò ipò 
+3. Bí o ṣe lè dá owó padà
+4. Bèèrè fún àfikún
+5. Bá aṣojú sọ̀rọ̀
+6. Jáde
 
-_To make a selection, reply with the *NUMBER ONLY* of your option._
+_Láti ṣe àsàyàn , dáhùn pẹ̀lú nọ́mbà tí o fẹ́._
 
-*EXAMPLE:* Reply with *1* to make Enquiry
+*Fún àpẹẹrẹ:* Dáhùn pẹ̀lú óókan (1) láti ṣe ìbéérè  
             """
 
             return self.send_message(msg) #end whatsapp message
@@ -141,15 +141,15 @@ _To make a selection, reply with the *NUMBER ONLY* of your option._
         """ This function destroys session data """
         self.redis.unlink(self.userid)
 
-        msg = "Thank you for using this medium to stay in touch with us."
-        msg += "\nFor more information kindly visit our website www.geep.ng or call 070010002000"
-        msg += "\nTo get started press *0*"
+        msg = "Eṣé tí ẹ lo ìlànà yí láti kàn sí wa."
+        msg += "\nFún ẹ̀kúnrẹ́rẹ́ àlàyé, ẹ jọ̀wọ́ ẹ kàn sí èrọ ayélujára www.geep.ng tàbí pé 070010002000."
+        msg += "\nláti bèrè, te *0*"
         return self.send_message(msg)
     
     def unknown_response(self, args='', args2=''):
         if self.welcome(): return 'OK'
 
-        return self.send_message("Kindly enter a valid response")
+        return self.send_message("Jọ̀wọ́ fi ìdáhùn tó péye sí lẹ̀")
     
     
         ##End of WhatsBot Class##
@@ -170,12 +170,12 @@ class UnknownNumber(WhatsBot):
 
     def greet(self, type=''):
 
-        msg = """{}*Please confirm your registered phone number*
+        msg = """{}*Jọ̀wọ́ ṣàyẹ̀wò nọ́mbà rẹ tí o fi sílẹ̀*
 
-1. {} is my registered phone number
-2. Enter my registered phone number  
+1. {} N jé mo ti se ìforúkọ sílè nọ́mbà mi
+2. Tẹ nọ́mbà rẹ
 
-_To make a selection, reply with the number ONLY of your option._ """.format( type, self.reg_sender)
+_Láti ṣe àṣàyàn, dáhùn pẹ̀lú nọ́mbà  tí o fẹ́_ """.format( type, self.reg_sender)
 
         return self.send_message(msg)
 
@@ -192,12 +192,12 @@ _To make a selection, reply with the number ONLY of your option._ """.format( ty
         return func[ self.message ]()
 
     def not_found(self):
-        msg = "Sorry, Your phone number does not exist in our records.\n\n_Reply *0* to return to Main Menu_"
+        msg = "Má bìnu a kòrí nómbà yìí nínú àkosílè wa, \n_tẹ òdo (0) láti padà sí àsàyàn wa_"
 
         return self.send_message(msg)
 
     def get_new_number(self):
-        msg = "Please enter your number in the format *08012345678*"
+        msg = "Jọ̀wọ́ tẹ nọ́mbà rẹ gẹ́gẹ́bí ìlànà yìí *08012345678*"
 
         return self.send_message(msg)
 
@@ -225,13 +225,13 @@ class Enquiry(WhatsBot):
     def greet(self):
         self.redis.hset(self.userid, 'sub_menu','enquiry_main')
 
-        msg = """ *What would you like to know?* 
+        msg = """ *Kíni  o fẹ́ láti mọ̀?* 
 
-1. About Tradermoni
-2. How to Register 
-0. Return To Main Menu
+1. Nípa Tradermoni
+2. Láti ṣe ìforúkọ sílẹ̀ 
+0. Padà
 
-To make a selection, reply with the *NUMBER ONLY* of your option.
+Láti ṣe àsàyàn, dáhùn pẹ̀lú nọ́mbà tí o fẹ́.
 """
         return self.send_message(msg)
     
@@ -253,31 +253,32 @@ To make a selection, reply with the *NUMBER ONLY* of your option.
         return sub_menus[ self.message ]()
 
     def about(self):
-        msg = """• TraderMoni is an interest-free loan from the *Federal Government of Nigeria* for *petty traders* across the country.
-• Loan range is from *₦10,000 - ₦100,000*. 
-• loan tenure is between *3-6 months*.
-• Adminstration fee is 2.5%.
-• For example, if you collect ₦10,000, you will pay back ₦10,250 with a weekly fee of ₦427.1. 
-• When you payback your first ₦10,250 within 3-6months, you will get ₦15,000, then you progress to ₦20,000, ₦50,000 & ₦100,000.
+        msg = """• Tradermoni jẹ́ ètò ẹ́yáwó tí kò ní èlé làti òdọ̀ ìjoba àpapọ̀ òrilẹ̀ èdè Nàìjíríà fún àwon ònísòwò kékèké káàkiri orílẹ̀ èdè.
+• Lóònù wà láti *₦10,000 - ₦100,000*. 
+• O lè dá lóónù rẹ padà  láàrín *oṣù 3 (Mẹ́ta) sí  6 (Mẹ́fà)*.
+• Owó  ìṣàkóso jẹ́ 2.5%.
+• Fun àpẹẹrẹ, tí o bá gba ₦10,000, wàá san ₦10,250 pèlú  ìṣirò ₦427.1 ní ọ̀sọ̀sẹ̀. 
+• Tí o bá san ₦10,250 padà  láàrín  oṣù 3-6, wà yege láti gba, ₦15,000, àti  ànfàní  láti gba ₦20,000, ₦50,000 ati ₦100,000.
 
 
-Press 0 to go back to Menu
+Tẹ 0 láti padà sí  àṣànyà
 
-Press * to go back to Previous Menu
+Tẹ * láti padà sẹ́yìn 
 """
 
         return self.send_message(msg)
     
     def how_to_register(self):
         self.redis.hset(self.userid, 'sub_menu', 'enquiry_sub')
-        msg = """A TraderMoni agent will come to your market to register you. They will take your names, details of what you sell and take your picture.
-*Note*: Tradermoni registration is FREE.
+        msg = """Aṣojú Trademoni máa  wa sí ọjà rẹ láti  ṣe ìforúko sílẹ̀  fún ọ. Wọ́n máa gba orúkọ rẹ, àpèjúwe oun tí ò ńtà, pẹ̀lú àwòrán rẹ.
+*Mọ̀ wípé:* ÒFẸ́ ni ìforúkọ sílẹ̀,  Máṣe fún enikẹ́ni ní ǹkankan
 
-If your Market has not been registered before *send 5.*
+Tí ojà rẹ kò bá tí ṣe ìforúko sílẹ̀ tètè  te 5 (Aárùń)
 
-Press 0 to go back to Menu
+Tẹ 0 láti padà sí  àṣànyà
 
-Press * to go back to Previous Menu
+Tẹ * láti padà sẹ́yìn 
+
 """
 
         return self.send_message(msg)
@@ -287,7 +288,7 @@ Press * to go back to Previous Menu
         RegisterMarket(self.sender, 'init')
 
     def call_support(self):
-        msg = """The Number to call is *0700 1000 2000* for TraderMoni OR *0700 627 5386* for MarketMoni"""
+        msg = """ Nọ́mbà láti pè ni *0700 1000 2000* fun TraderMoni"""
 
         return self.send_message(msg)
 class RegisterMarket(WhatsBot):
@@ -303,10 +304,9 @@ class RegisterMarket(WhatsBot):
 
     def greet(self):
         self.redis.hset(self.userid, 'sub_menu','market_register_q2')
-        msg = """Press *0* at anytime to cancel and return to Main Menu
+        msg = """Tẹ 0 láti padà sí  àṣànyà
 
-
-Please Enter Your Market Name """
+Jọ̀wọ́ tẹ orúkọ oja rẹ"""
         return self.send_message(msg)
 
     def respond(self):
@@ -323,19 +323,19 @@ Please Enter Your Market Name """
     def q2(self):
         self.redis.hset(self.userid, 'sub_menu','market_register_q3')
         self.redis.hset(self.userid, 'market_name',self.message)
-        msg = """Please Enter Your State """
+        msg = """Jọ̀wọ́ tẹ orúkọ ìpínlè rẹ """
         return self.send_message(msg)
 
     def q3(self):
         self.redis.hset(self.userid, 'sub_menu','market_register_q4')
         self.redis.hset(self.userid, 'market_state',self.message)
-        msg = """Please Enter Your LGA """
+        msg = """Jọ̀wọ́ tẹ ìjọba ìpínlẹ̀ rẹ"""
         return self.send_message(msg)
 
     def q4(self):
         self.redis.hset(self.userid, 'sub_menu','market_register_complete')
         self.redis.hset(self.userid, 'market_lga',self.message)
-        msg = """Please Enter Your Address """
+        msg = """Jọ̀wọ́ tẹ àdírẹ́ẹ̀sì rẹ """
         return self.send_message(msg)
 
     def save_market(self):
@@ -351,9 +351,9 @@ Please Enter Your Market Name """
         address = self.redis.hget(self.userid, 'market_address')
         # call a GeepNerve Fubction to save this info in DB
         GeepNerve('','').new_register(name, state, lga, address)
-        msg = """Market details saved successfully.
+        msg = """ Ati gba àwon àláyé ibi ìtajà rẹ sí lẹ̀.
 
-Press *0* to return to Main Menu
+Tẹ ódo láti padá sí àsàyàn
  """
         return self.send_message(msg)
 
@@ -394,19 +394,19 @@ class LoanStatus(WhatsBot):
 
 
 
-            msg = """Your Loan Status is *{}*
-*Account Summary*
-Loan Amount: {}
-Amount Due: {}
-Amount Repaid: {}
-Amount in Default: {}
-Disbursement Date: {}
+            msg = """Lóònù rẹ jẹ́ *{}*
+*Àkọ́lé lápaapọ̀*
+Iye lóònù: {}
+Iye tó ye kó o san: {}
+Iye tí o ti san: {}
+Iye tó kù láti san: {}
+Ìsanwó (ìgbowó jáde) déètì: {}
 
-Press 0 to go back to Menu
+Tẹ ódo láti padá sí àsàyàn
 """.format( status[0], loan_amount, amount_due, amount_paid, amount_default, date_disbursed)
         else:
-            msg = "Your Loan Status is *{}*".format(status[0])
-            msg += "\n\nPress 0 to go back to Menu"
+            msg = "Lóònù rẹ jẹ́ *{}*".format(status[0])
+            msg += "\n\nTẹ ódo láti padá sí àsàyàn"
 
         return self.send_message(msg)
     
@@ -431,15 +431,15 @@ Press 0 to go back to Menu
             return
 
         if status[0] == 'LoanDisbursedSuccessfully':
-            msg = 'Your loan has been disbursed successfully'
+            msg = 'Ati san lóònù rẹ'
         elif status[0] in ['PendingApproval', 'PendingCustomerConfirmation', 'PendingFIreConfirmation', 'PendingICUConfirmation']:
-            msg = "Your loan application is being processed"
+            msg = "Ìbẹ̀wẹ̀ lóònù rẹ ti ń ní ìlosíwájú"
         elif status[0] == 'DueForDisbursement':
-            msg = 'Your loan application is due for disbursement'
+            msg = 'Ó ti tó àsìkò láti san lóònu rẹ'
         else:
-            msg = "Your loan application was unsuccessful"
+            msg = "O kò yege nínú Ìbẹ̀wẹ̀ lóònù rẹ"
 
-        msg = msg + "\n\n_Reply *0* to return to Main Menu_"
+        msg = msg + "\n\n_Tẹ ódo láti padá sí àsàyàn_"
 
         return self.send_message(msg)
 
@@ -456,26 +456,26 @@ class RepayOptions(WhatsBot):
         msg="""
 *➣*	*PAYMENT THROUGH BANK:*
  
-• Go To ANY Bank.
+• Lo sí èyíkèyí ilé ìfowópamó.
 
-• Fill the Teller form.
+• Dáhùn àwon ìbéérè orí ìwé pélébé ní ilé ìfowópamó
 
-• Tell The Bank Cashier you want to pay
-   your BOI-GEEP Tradermoni
-   Loan on PAYDIRECT.
+• So fún òsìsé ilé ìfowópamó 
+   pé o fẹ́ san lóònù BOI-GEEP 
+   TraderMoni lórí PAYDIRECT.
 
-• Give The Bank Cashier the PHONE
-   NUMBER YOU USED TO REGISTER
-   your TraderMoni Loan.
+• Fún òṣìṣé ilé ìfowópamó 
+   ní nọ́mbà fóònù tí o fi ṣe 
+   ìforúkosílẹ fún lóónù Tradermoni.
 
-• Collect your payment receipt.
+• Gba ìwé ẹ̀rí ìfowópawó.
 
 *➣*	*PAYMENT THROUGH SCRATCH CARD*
-Buy Tradermoni scratch card from any OneCard agent around you, check the card for guide on how to repay your loan.
+Ra káàdì Tradermoni láti ọwọ́ èyíkèyí aṣojú Onecard ní agbègbè rẹ, wo ara káàdì na fún ìlànà nípa sísan lóònù rẹ.
 
-Press 0 to go back to main menu
+Tẹ òòdo (0) láti padà sí àsàyàn
 
-To make a selection, reply with the *NUMBER ONLY* of your option.
+Láti ṣe àsàyàn, dáhùn pẹ̀lú nọ́mbà tí ó fẹ́
 
 """
 
@@ -501,14 +501,14 @@ class LoanUpgrade(WhatsBot):
         if status[0].lower() in ('disbursed', 'cashedout'):
             amount_owed = customer.check_amount_owed()[0]
             if amount_owed == 0:
-                msg = "Your request has been received. \nWe will process your loan and you will get your payment in your Wallet Account"
-                msg += "\n\nPress 0 to go back to main menu"
+                msg = "Tí ó bá jẹ́ bẹ̀, dáhùn pẹ̀lú ati gba ìbéère rẹ. \nA máa ṣisẹ́ lórí lóònù rẹ, o ó sì gba owó nàá sínú àpò owó rẹ."
+                msg += "\n\nTẹ òòdo (0) láti padà sí àsàyàn"
             else:
-                msg = "You have a loan balance of {}. Kindly pay your current loan before you request for an Upgrade".format(amount_owed)
-                msg += "\n\nPress 0 to go back to main menu"
+                msg = "dáhùn pẹ̀lú Ó ní iye lóònù báyi  {}. Jọ̀wọ́ san owó tí ó kù, kí o tó lẹ́tọ làti gba èyí tí ó kàn.".format(amount_owed)
+                msg += "\n\nTẹ òòdo (0) láti padà sí àsàyàn"
         else:
             msg = "Your loan status is *{}*".format(status[0])
-            msg += "\n\nPress 0 to go back to main menu"
+            msg += "\n\nTẹ òòdo (0) láti padà sí àsàyàn"
 
         return self.send_message(msg)
 
@@ -524,8 +524,8 @@ class SpeakToAgent(WhatsBot):
             self.greet()
 
     def greet(self):
-        msg= "The Number to call is *0700 1000 200* for TraderMoni"
-        msg += "\n\nPress 0 to go back to main menu"
+        msg= " Nọ́mbà láti pè ni *0700 1000 200* fun TraderMoni"
+        msg += "\n\nTẹ òòdo (0) láti padà sí àsàyàn"
 
         return self.send_message(msg)
 

@@ -84,6 +84,15 @@ class GeepNerve:
         # print(cursor.rowcount, "record inserted.")
         pass
 
+    def new_register(self, market_name, market_state, market_lga, market_address):
+        cursor = self.connection.cursor(buffered=True)
+        sql = "INSERT INTO cmdc.bot_new_registers (market_name, market_state, market_lga, market_address) VALUES ( %s, %s, %s, %s)"
+        param = (market_name, market_state, market_lga, market_address, )
+        cursor.execute(sql, param)
+        self.connection.commit()
+
+        pass
+
 
 
 

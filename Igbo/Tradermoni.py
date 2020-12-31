@@ -106,19 +106,19 @@ class WhatsBot:
             #SET current menu to main menu for the current user
             self.redis.hmset(self.userid, {'menu': 'main', 'sub_menu': ''})
 
-            msg = """*Welcome to BOI-GEEP*\n
-*WHAT WOULD YOU LIKE TO DO* 
+            msg = """*Nnoo na BOI-GEEP*\n
+*Gini kai choro ime?* 
 
-1. Enquiry
-2. Check your Loan status
-3. How To Repay
-4. Request For Loan Upgrade
-5. Speak to an Agent
-6. Logout
+1. Maka ime nchoputa
+2. Maka imara onudu ego mbinye gi
+3. Maka etu iga esi kwugachi ego gi
+4. Icho inweta ego nkwalite
+5. Ichoro ka gi na onye Agent kwuo
+6. Maka ipu
 
-_To make a selection, reply with the *NUMBER ONLY* of your option._
+_Maka ihoro akara obula, pia *number no* na nke ichoro._
 
-*EXAMPLE:* Reply with *1* to make Enquiry
+*Igi maa atu:* pia otu maka ime nchoputa
             """
 
             return self.send_message(msg) #end whatsapp message
@@ -141,15 +141,15 @@ _To make a selection, reply with the *NUMBER ONLY* of your option._
         """ This function destroys session data """
         self.redis.unlink(self.userid)
 
-        msg = "Thank you for using this medium to stay in touch with us."
-        msg += "\nFor more information kindly visit our website www.geep.ng or call 070010002000"
-        msg += "\nTo get started press *0*"
+        msg = "Imela maka iji usoro a rute anyi."
+        msg += "\nMaka imara ozi ndi ozo bia na akara nwa uzuzo anyi bu www.geep.ng ma obu ipoo anyi na 070010002000."
+        msg += "\nMaka ibido pia efu"
         return self.send_message(msg)
     
     def unknown_response(self, args='', args2=''):
         if self.welcome(): return 'OK'
 
-        return self.send_message("Kindly enter a valid response")
+        return self.send_message("Biko tinye ihe kwesiri ekwesi ")
     
     
         ##End of WhatsBot Class##
@@ -170,12 +170,12 @@ class UnknownNumber(WhatsBot):
 
     def greet(self, type=''):
 
-        msg = """{}*Please confirm your registered phone number*
+        msg = """{}*Biko choputa ma obukwa akara ekwenti ijiri debanye aha*
 
-1. {} is my registered phone number
-2. Enter my registered phone number  
+1. {} Obu akara ekwenti m jiri debanye aha
+2. Tinye akara ekwenti m jiri debanye aha
 
-_To make a selection, reply with the number ONLY of your option._ """.format( type, self.reg_sender)
+_Maka ihoro akara obula, pia number no na nke ichoro._ """.format( type, self.reg_sender)
 
         return self.send_message(msg)
 
@@ -192,12 +192,12 @@ _To make a selection, reply with the number ONLY of your option._ """.format( ty
         return func[ self.message ]()
 
     def not_found(self):
-        msg = "Sorry, Your phone number does not exist in our records.\n\n_Reply *0* to return to Main Menu_"
+        msg = " Ewela Iwe, akara ekwenti ijiri debanye aha anaghi egosi n'akwukwo anyi.\n\n_pia efu maka ilagachi azu n'ebe ibidoro_"
 
         return self.send_message(msg)
 
     def get_new_number(self):
-        msg = "Please enter your number in the format *08012345678*"
+        msg = "Biko tinye akara ekwenti gi etu esi tuziere gi aka *08012345678*"
 
         return self.send_message(msg)
 
@@ -225,13 +225,13 @@ class Enquiry(WhatsBot):
     def greet(self):
         self.redis.hset(self.userid, 'sub_menu','enquiry_main')
 
-        msg = """ *What would you like to know?* 
+        msg = """ *Gini ka iga acho imata?* 
 
-1. About Tradermoni
-2. How to Register 
-0. Return To Main Menu
+1. Imara maka Tradermoni
+2. Imara etu iga esi debanye aha
+0. Maka ilagachi azu
 
-To make a selection, reply with the *NUMBER ONLY* of your option.
+Maka ime nhoro, jiri akara nke ichoro zagachi.
 """
         return self.send_message(msg)
     
@@ -253,31 +253,31 @@ To make a selection, reply with the *NUMBER ONLY* of your option.
         return sub_menus[ self.message ]()
 
     def about(self):
-        msg = """• TraderMoni is an interest-free loan from the *Federal Government of Nigeria* for *petty traders* across the country.
-• Loan range is from *₦10,000 - ₦100,000*. 
-• loan tenure is between *3-6 months*.
-• Adminstration fee is 2.5%.
-• For example, if you collect ₦10,000, you will pay back ₦10,250 with a weekly fee of ₦427.1. 
-• When you payback your first ₦10,250 within 3-6months, you will get ₦15,000, then you progress to ₦20,000, ₦50,000 & ₦100,000.
+        msg = """• Tradermoni bu ego mbinye na nweghi omurunwa Government Nigeria na-enye ndi na azu obere ahia na gwuru-gwuru ala anyi.
+• Ego mbinye a sitere na *₦10,000 - ₦100,000*. 
+• Oge eji akwugachi ego a bu site na onwa ato ruo onwa isii.
+• Ugwo nhazi bu 2.5%.
+• Iji maa atu, oburu na inata ₦10,000, iga akwugachi nani ₦10,250 bu nke iga na akwu ₦427.1. 
+• Mgbe ikwugachiri ₦10,250 nke mbu gi na ihe dika site na onwa ato ruo onwa isii, iga etozu oke inata ₦15,000,Ikwugachi ya, inata ₦20,000, ₦50,000 & ₦100,000.
 
 
-Press 0 to go back to Menu
+Pia efu maka ilagachi ebe ibidoro
 
-Press * to go back to Previous Menu
+Pia * maka ilagachi azu ebe ino mbu
 """
 
         return self.send_message(msg)
     
     def how_to_register(self):
         self.redis.hset(self.userid, 'sub_menu', 'enquiry_sub')
-        msg = """A TraderMoni agent will come to your market to register you. They will take your names, details of what you sell and take your picture.
-*Note*: Tradermoni registration is FREE.
+        msg = """Onye Agent Tradermoni ga abia na ebe ina azu ahia bia debanye aha gi. Ha ga aju gi aha gi, juo gi ihe ina ere, ma sekwa gi photo.
+*Marakwa*: Ejigi ego edebanye aha.
 
-If your Market has not been registered before *send 5.*
+Oburu na edebanyeghi aha ahia unu mbu, *pia ise*
 
-Press 0 to go back to Menu
+Pia efu maka ilagachi ebe ibidoro
 
-Press * to go back to Previous Menu
+Pia * maka ilagachi azu ebe ino mbu
 """
 
         return self.send_message(msg)
@@ -287,7 +287,7 @@ Press * to go back to Previous Menu
         RegisterMarket(self.sender, 'init')
 
     def call_support(self):
-        msg = """The Number to call is *0700 1000 2000* for TraderMoni OR *0700 627 5386* for MarketMoni"""
+        msg = """Akara ekwenti iga eji kpo anyi bu *0700 1000 2000* bu TraderMoni"""
 
         return self.send_message(msg)
 class RegisterMarket(WhatsBot):
@@ -303,10 +303,9 @@ class RegisterMarket(WhatsBot):
 
     def greet(self):
         self.redis.hset(self.userid, 'sub_menu','market_register_q2')
-        msg = """Press *0* at anytime to cancel and return to Main Menu
+        msg = """Pia efu mgbe obula iji kagbuo ma lagachikwa azu ebe ibidoro
 
-
-Please Enter Your Market Name """
+Biko Tinye Aha ahia unu"""
         return self.send_message(msg)
 
     def respond(self):
@@ -323,19 +322,19 @@ Please Enter Your Market Name """
     def q2(self):
         self.redis.hset(self.userid, 'sub_menu','market_register_q3')
         self.redis.hset(self.userid, 'market_name',self.message)
-        msg = """Please Enter Your State """
+        msg = """Biko tinye aha state gi """
         return self.send_message(msg)
 
     def q3(self):
         self.redis.hset(self.userid, 'sub_menu','market_register_q4')
         self.redis.hset(self.userid, 'market_state',self.message)
-        msg = """Please Enter Your LGA """
+        msg = """ Biko tinye local government gi """
         return self.send_message(msg)
 
     def q4(self):
         self.redis.hset(self.userid, 'sub_menu','market_register_complete')
         self.redis.hset(self.userid, 'market_lga',self.message)
-        msg = """Please Enter Your Address """
+        msg = """Biko tinye address ebe ibi """
         return self.send_message(msg)
 
     def save_market(self):
@@ -351,9 +350,9 @@ Please Enter Your Market Name """
         address = self.redis.hget(self.userid, 'market_address')
         # call a GeepNerve Fubction to save this info in DB
         GeepNerve('','').new_register(name, state, lga, address)
-        msg = """Market details saved successfully.
+        msg = """Ihe gwasara ebe ina azu ahia banyere ofuma.
 
-Press *0* to return to Main Menu
+Pia efu maka ilagachi azu na ebe ibidoro
  """
         return self.send_message(msg)
 
@@ -394,19 +393,19 @@ class LoanStatus(WhatsBot):
 
 
 
-            msg = """Your Loan Status is *{}*
-*Account Summary*
-Loan Amount: {}
-Amount Due: {}
-Amount Repaid: {}
-Amount in Default: {}
-Disbursement Date: {}
+            msg = """Onodu ego mbinye gi bu *{}*
+*Nchikota Account*
+Ego inara: {}
+Ego ikwesiri ikwu: {}
+Ego ikwurula: {}
+Ego foduru: {}
+Ubochi Ekwesiri ikwu gi ugwo: {}
 
-Press 0 to go back to Menu
+Pia efu maka ilagachi azu na ebe ibidoro
 """.format( status[0], loan_amount, amount_due, amount_paid, amount_default, date_disbursed)
         else:
-            msg = "Your Loan Status is *{}*".format(status[0])
-            msg += "\n\nPress 0 to go back to Menu"
+            msg = "Onudu ego mbinye gi bu *{}*".format(status[0])
+            msg += "\n\nPia efu maka ilagachi azu na ebe ibidoro"
 
         return self.send_message(msg)
     
@@ -431,15 +430,15 @@ Press 0 to go back to Menu
             return
 
         if status[0] == 'LoanDisbursedSuccessfully':
-            msg = 'Your loan has been disbursed successfully'
+            msg = 'Akwunyerela gi ego mbinye gi'
         elif status[0] in ['PendingApproval', 'PendingCustomerConfirmation', 'PendingFIreConfirmation', 'PendingICUConfirmation']:
-            msg = "Your loan application is being processed"
+            msg = "Akana ahazi ego mbinye idebanye aha gi"
         elif status[0] == 'DueForDisbursement':
-            msg = 'Your loan application is due for disbursement'
+            msg = 'Ego mbinye idenyere aha gi eruola mgbe aga akwunyere gi ya'
         else:
-            msg = "Your loan application was unsuccessful"
+            msg = "Ego mbinye idebanyere aha gi agaghi nke oma"
 
-        msg = msg + "\n\n_Reply *0* to return to Main Menu_"
+        msg = msg + "\n\n_Pia efu maka ilagachi azu na ebe ibidoro_"
 
         return self.send_message(msg)
 
@@ -454,28 +453,28 @@ class RepayOptions(WhatsBot):
     
     def greet(self):
         msg="""
-*➣*	*PAYMENT THROUGH BANK:*
+*➣*	*MAKA IJI BANK AKWUGACHI UGWO:*
  
-• Go To ANY Bank.
+• Gaa na Bank obula.
 
-• Fill the Teller form.
+• Denye aha na akwukwo eji akwunye ego.
 
-• Tell The Bank Cashier you want to pay
-   your BOI-GEEP Tradermoni
-   Loan on PAYDIRECT.
+• Gwa onye ana akwu ego na ichoro 
+   iji PAYDIRECT kwuo ugwo
+   BOI-GEEP Tradermoni.
 
-• Give The Bank Cashier the PHONE
-   NUMBER YOU USED TO REGISTER
-   your TraderMoni Loan.
+• Nye onye okwu ugwo AKARA
+   EKWE NTI ijiri debanye aha 
+   na ego mbinye Tradermoni.
 
-• Collect your payment receipt.
+• Nara akwukwo na egosi na ikwuru ugwo.
 
-*➣*	*PAYMENT THROUGH SCRATCH CARD*
-Buy Tradermoni scratch card from any OneCard agent around you, check the card for guide on how to repay your loan.
+*➣*	*IJI SCRATCH CARD AKWU UGWO*
+Gaa zuta Tradermoni scratch card site na aka onye OneCard agent obula no gi nso, Lee anya ofuma na ebe atuziri aka etu iga esi akwu ugwo gi
 
-Press 0 to go back to main menu
+Pia efu maka ilagachi azu na ebe ibidoro
 
-To make a selection, reply with the *NUMBER ONLY* of your option.
+Maka ime nhoro, jiri akara nke ichoro zagachi 
 
 """
 
@@ -501,14 +500,14 @@ class LoanUpgrade(WhatsBot):
         if status[0].lower() in ('disbursed', 'cashedout'):
             amount_owed = customer.check_amount_owed()[0]
             if amount_owed == 0:
-                msg = "Your request has been received. \nWe will process your loan and you will get your payment in your Wallet Account"
-                msg += "\n\nPress 0 to go back to main menu"
+                msg = "anabatala aririo gi.\nAnyi ga ahazi ego mbinye gi ma zitere gi ego gi na account gi"
+                msg += "\n\nPia efu maka ilagachi azu na ebe ibidoro"
             else:
-                msg = "You have a loan balance of {}. Kindly pay your current loan before you request for an Upgrade".format(amount_owed)
-                msg += "\n\nPress 0 to go back to main menu"
+                msg = "enwere ego ina akwubeghi {}. Jisie ike kwuo ugwo gi tupu inata ego nkwalite".format(amount_owed)
+                msg += "\n\nPia efu maka ilagachi azu na ebe ibidoro"
         else:
-            msg = "Your loan status is *{}*".format(status[0])
-            msg += "\n\nPress 0 to go back to main menu"
+            msg = "Onudu ego mbinye gi bu *{}*".format(status[0])
+            msg += "\n\nPia efu maka ilagachi azu na ebe ibidoro"
 
         return self.send_message(msg)
 
@@ -524,8 +523,8 @@ class SpeakToAgent(WhatsBot):
             self.greet()
 
     def greet(self):
-        msg= "The Number to call is *0700 1000 200* for TraderMoni"
-        msg += "\n\nPress 0 to go back to main menu"
+        msg= "Akara ekwe nti Tradermoni bu *0700 1000 200*"
+        msg += "\n\nPia efu maka ilagachi azu na ebe ibidoro"
 
         return self.send_message(msg)
 
