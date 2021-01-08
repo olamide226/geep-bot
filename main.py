@@ -52,7 +52,7 @@ class HelloWorld(Resource):
                     # return self.send_message(sender, 'Coming soon...')
                     from English.Farmermoni import WhatsBot
                 else:
-                    prod = self.set_product(sender, message)
+                    prod = self.set_english_product(sender, message)
                     if prod in ['Tradermoni', 'Marketmoni', 'Farmermoni']:
                         WhatsBot = import_module('English.{}'.format(prod)).WhatsBot
                         message = '0' #switch to Main menu
@@ -74,7 +74,7 @@ class HelloWorld(Resource):
                     # return self.send_message(sender, 'Coming soon...')
                     from Pidgin.Farmermoni import WhatsBot
                 else:
-                    prod = self.set_product(sender, message)
+                    prod = self.set_pidgin_product(sender, message)
                     if prod in ['Tradermoni', 'Marketmoni', 'Farmermoni']:
                         WhatsBot = import_module('Pidgin.{}'.format(prod)).WhatsBot
                         message = '0' #switch to Main menu
@@ -96,7 +96,7 @@ class HelloWorld(Resource):
                     # return self.send_message(sender, 'Coming soon...')
                     from Igbo.Farmermoni import WhatsBot
                 else:
-                    prod = self.set_product(sender, message)
+                    prod = self.set_igbo_product(sender, message)
                     if prod in ['Tradermoni', 'Marketmoni', 'Farmermoni']:
                         WhatsBot = import_module('Igbo.{}'.format(prod)).WhatsBot
                         message = '0' #switch to Main menu
@@ -119,7 +119,7 @@ class HelloWorld(Resource):
                     # return self.send_message(sender, 'Coming soon...')
                     from Yoruba.Farmermoni import WhatsBot
                 else:
-                    prod = self.set_product(sender, message)
+                    prod = self.set_yoruba_product(sender, message)
                     if prod in ['Tradermoni', 'Marketmoni', 'Farmermoni']:
                         WhatsBot = import_module('Yoruba.{}'.format(prod)).WhatsBot
                         message = '0' #switch to Main menu
@@ -141,7 +141,7 @@ class HelloWorld(Resource):
                     # return self.send_message(sender, 'Coming soon...')
                     from Hausa.Farmermoni import WhatsBot
                 else:
-                    prod = self.set_product(sender, message)
+                    prod = self.set_hausa_product(sender, message)
                     if prod in ['Tradermoni', 'Marketmoni', 'Farmermoni']:
                         WhatsBot = import_module('Hausa.{}'.format(prod)).WhatsBot
                         message = '0' #switch to Main menu
@@ -189,13 +189,37 @@ class HelloWorld(Resource):
         if message not in ['1','2','3','4','5']:
             connection.hdel("user:{}".format(sender), 'lang')
             return self.send_message(sender, msg)
-        
+       
+
         # Set language to selected number
         languages = dict([('1', 'English'), ('2', 'Hausa'), ('3', 'Igbo'), ('4', 'Pidgin'), ('5', 'Yoruba') ])
         connection.hset("user:{}".format(sender), 'lang', languages[message])
-            #return self.set_hausa_product(sender, message) 
+
+        if message not in ['2','3','4','5']:
+            connection.hset("user:{}".format(sender), 'lang', languages[message])
+            return self.set_english_product(sender, message)
+
+        if message not in ['1','3','4','5']:
+            connection.hset("user:{}".format(sender), 'lang', languages[message])
+            return self.set_hausa_product(sender, message)
+
+        if message not in ['1','2','4','5']:
+            connection.hset("user:{}".format(sender), 'lang', languages[message])
+            return self.set_igbo_product(sender, message)
+
+        if message not in ['1','2','3','5']:
+            connection.hset("user:{}".format(sender), 'lang', languages[message])
+            return self.set_pidgin_product(sender, message)
+
+        if message not in ['1','2','3','4']:
+            connection.hset("user:{}".format(sender), 'lang', languages[message])
+            return self.set_yoruba_product(sender, message)
+
         # Next step after setting langiage will always be to set product
-        return self.set_product(sender, message)
+        self.complete = True
+        return 
+        #return self.set_product(sender, message)
+
 
     def get_product(self, sender):
         connection = redis.Redis(decode_responses=True)
@@ -204,7 +228,7 @@ class HelloWorld(Resource):
         return product
 
     
-    def set_product(self, sender, message):
+    def set_english_product(self, sender, message):
         connection = redis.Redis(decode_responses=True)
         product = connection.hget("user:{}".format(sender), 'product')
         msg = "Welcome to *BOI-GEEP* \n\n"
@@ -228,6 +252,101 @@ class HelloWorld(Resource):
         self.complete = True
         return products[message]
 
+    def set_hausa_product(self, sender, message):
+        connection = redis.Redis(decode_responses=True)
+        product = connection.hget("user:{}".format(sender), 'product')
+        msg = "Barka da zuwa *BOI-GEEP* \n\n"
+        msg += "Wani tsari kake son zaba? \n"
+        msg += "1.      Tradermoni \n"
+        msg += "2.      Marketmoni \n"
+        msg += "3.      Farmermoni \n"
+        msg += "\n_Domin zaban yare, a zaba guda daya kadai cikin lambobin._"
+
+        if not product:
+            connection.hset("user:{}".format(sender), 'product', 'none')
+            return self.send_message(sender, msg)
+
+        if message not in ['1', '2', '3']:
+            connection.hdel("user:{}".format(sender), 'product')
+            return self.send_message(sender, msg)
+
+        #Set Product to selected number
+        products = {'1': 'Tradermoni', '2': 'Marketmoni', '3': 'Farmermoni'}
+        connection.hset("user:{}".format(sender), 'product', products[message])
+        self.complete = True
+        return products[message]
+
+    def set_igbo_product(self, sender, message):
+        connection = redis.Redis(decode_responses=True)
+        product = connection.hget("user:{}".format(sender), 'product')
+        msg = "Nnoo na *BOI-GEEP* \n\n"
+        msg += "Kedu ngwaahiaa ichoro ihoro? \n"
+        msg += "1.      Tradermoni \n"
+        msg += "2.      Marketmoni \n"
+        msg += "3.      Farmermoni \n"
+        msg += "\n_Maka ihoro asusu obula, pia akara no na asusu ichoro._"
+
+        if not product:
+            connection.hset("user:{}".format(sender), 'product', 'none')
+            return self.send_message(sender, msg)
+
+        if message not in ['1', '2', '3']:
+            connection.hdel("user:{}".format(sender), 'product')
+            return self.send_message(sender, msg)
+
+        #Set Product to selected number
+        products = {'1': 'Tradermoni', '2': 'Marketmoni', '3': 'Farmermoni'}
+        connection.hset("user:{}".format(sender), 'product', products[message])
+        self.complete = True
+        return products[message]
+
+    def set_pidgin_product(self, sender, message):
+        connection = redis.Redis(decode_responses=True)
+        product = connection.hget("user:{}".format(sender), 'product')
+        msg = "Welcome to *BOI-GEEP* \n\n"
+        msg += "Na which product you go like choose? \n"
+        msg += "1.      Tradermoni \n"
+        msg += "2.      Marketmoni \n"
+        msg += "3.      Farmermoni \n"
+        msg += "\n_To make a selection, reply with ONLY THE NUMBER of your option._"
+
+        if not product:
+            connection.hset("user:{}".format(sender), 'product', 'none')
+            return self.send_message(sender, msg)
+
+        if message not in ['1', '2', '3']:
+            connection.hdel("user:{}".format(sender), 'product')
+            return self.send_message(sender, msg)
+
+        #Set Product to selected number
+        products = {'1': 'Tradermoni', '2': 'Marketmoni', '3': 'Farmermoni'}
+        connection.hset("user:{}".format(sender), 'product', products[message])
+        self.complete = True
+        return products[message]
+
+    def set_yoruba_product(self, sender, message):
+        connection = redis.Redis(decode_responses=True)
+        product = connection.hget("user:{}".format(sender), 'product')
+        msg = "Ka bo si *BOI-GEEP* \n\n"
+        msg += "Eto wo ni o fe lati yan? \n"
+        msg += "1.      Tradermoni \n"
+        msg += "2.      Marketmoni \n"
+        msg += "3.      Farmermoni \n"
+        msg += "\n_Lati se asayan, dahun pelu nomba ede ti o fe._"
+        
+        if not product:
+            connection.hset("user:{}".format(sender), 'product', 'none')
+            return self.send_message(sender, msg)
+
+        if message not in ['1', '2', '3']:
+            connection.hdel("user:{}".format(sender), 'product')
+            return self.send_message(sender, msg)
+
+        #Set Product to selected number
+        products = {'1': 'Tradermoni', '2': 'Marketmoni', '3': 'Farmermoni'}
+        connection.hset("user:{}".format(sender), 'product', products[message])
+        self.complete = True
+        return products[message]
 
     def setup(self ,sender, message, language_selected):
         pass
